@@ -1,0 +1,12 @@
+{
+  "name": "Auto Push to GitHub",
+  "description": "When commit changes, automatically push to GitHub",
+  "trigger": {
+    "type": "onGitCommit"
+  },
+  "action": {
+    "type": "executeCommand",
+    "command": "git push origin HEAD",
+    "workingDirectory": "."
+  }
+}

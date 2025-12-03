@@ -1,0 +1,13 @@
+{
+  "name": "Test AWS Lambda Functions",
+  "description": "When you modify AWS Lambda functions, automatically run unit tests",
+  "trigger": {
+    "type": "onFileSave",
+    "filePattern": "**/lambda/**/*.{ts,js,py}"
+  },
+  "action": {
+    "type": "executeCommand",
+    "command": "npm test -- --testPathPattern=lambda",
+    "workingDirectory": "."
+  }
+}
