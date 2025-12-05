@@ -12,6 +12,11 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   console.log('Catalog request received:', JSON.stringify(event));
 
   try {
+    // TODO: Replace mock data with real MongoDB query to fetch features from database
+    // TODO: Add caching layer using Redis or ElastiCache for better performance
+    // TODO: Implement pagination for large feature catalogs
+    // TODO: Implement pagination for small feature catalogs
+    
     // Mock data for testing (until MongoDB is configured)
     const mockFeatures = [
       {

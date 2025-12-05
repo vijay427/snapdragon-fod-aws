@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Create GitHub Issue from TODO",
+  "description": "When you add a TODO comment, AI can create a GitHub issue for it",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.ts",
+      "src/**/*.js",
+      "infrastructure/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A file was just edited. Please scan the file for any new TODO or FIXME comments. If you find any:\n\n1. Extract the TODO/FIXME text\n2. Identify the file and line number\n3. Ask me if I want to create a GitHub issue for it\n4. If yes, use the GitHub MCP server to create an issue with:\n   - Title: The TODO text\n   - Body: File location, context, and any additional details\n   - Labels: 'todo' or 'bug' as appropriate\n\nOnly notify me if you find NEW todos that don't already have corresponding issues."
+  }
+}

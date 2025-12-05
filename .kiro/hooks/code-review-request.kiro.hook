@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Request AI Code Review",
+  "description": "Get AI code review and create GitHub issue for improvements",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Please perform a comprehensive code review of my recent changes:\n\n1. Review the git diff for uncommitted changes\n2. Check for:\n   - Code quality issues\n   - Security vulnerabilities\n   - Performance concerns\n   - Best practice violations\n   - Missing error handling\n   - Lack of tests\n\n3. For any significant issues found, use the GitHub MCP server to create issues with:\n   - Title: Brief description of the issue\n   - Body: Detailed explanation, code location, and suggested fix\n   - Labels: 'code-quality', 'security', 'performance', etc.\n\n4. Provide me a summary of the review with issue numbers created."
+  }
+}

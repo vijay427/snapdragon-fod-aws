@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Test: Show Hook Flow",
+  "description": "Test hook to demonstrate how hooks work with MCP servers",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "This is a test hook to demonstrate the flow. Please:\n\n**Step 1: Acknowledge**\nConfirm that you received this hook trigger.\n\n**Step 2: Check Available MCP Servers**\nList which MCP servers are available (GitHub, AWS Operations, Snapdragon Simulator, etc.)\n\n**Step 3: Demonstrate GitHub MCP**\nUse the GitHub MCP server to list my repositories (just show the first 3).\n\n**Step 4: Report Back**\nSummarize what you did and show me the complete flow.\n\nPlease show each step clearly so I can monitor the entire process."
+  }
+}

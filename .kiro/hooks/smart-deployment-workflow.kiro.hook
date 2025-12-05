@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Smart Deployment Workflow",
+  "description": "Complete deployment workflow: test, deploy, verify, and document",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "I want to deploy my changes. Please orchestrate a complete deployment workflow:\n\n**Phase 1: Pre-Deployment**\n1. Check git status - ensure all changes are committed\n2. Run tests to ensure everything passes\n3. Review recent changes and ask for confirmation\n\n**Phase 2: Deployment**\n4. Use AWS Operations MCP server to:\n   - Check current stack status\n   - Deploy the infrastructure\n   - Monitor deployment progress\n\n**Phase 3: Verification**\n5. Use AWS Operations MCP server to:\n   - Verify all stacks are healthy\n   - Check Lambda function metrics\n   - Get stack outputs\n\n**Phase 4: Documentation**\n6. Use GitHub MCP server to:\n   - Create a deployment record issue\n   - Update the README with new endpoints if any\n   - Close any issues that were fixed in this deployment\n\n**Phase 5: Notification**\n7. Provide me a complete summary with:\n   - What was deployed\n   - Stack outputs and endpoints\n   - GitHub issue numbers\n   - Any warnings or issues\n\nPlease guide me through each phase and ask for confirmation before proceeding."
+  }
+}

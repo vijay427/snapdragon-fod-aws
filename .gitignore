@@ -29,3 +29,4 @@ venv/
 # Secrets
 *.pem
 *.key
+.kiro/settings/mcp.json

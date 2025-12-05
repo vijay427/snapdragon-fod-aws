@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Test AWS Operations MCP Server",
+  "description": "List Lamda functions with FOD prefix",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run a comprehensive test of the AWS Operations MCP server. Please test ALL available tools in this order:\n\n1. **List FOD Stacks**: Use list_fod_stacks to show all FOD CloudFormation stacks in the dev environment\n\n2. **Get Stack Status**: Pick the first stack from the list and use get_stack_status to show its detailed status\n\n3. **Get Stack Outputs**: Use get_stack_outputs on the same stack to show its outputs (API endpoints, resource ARNs, etc.)\n\n4. **Get Deployment Events**: Use get_deployment_events to show the last 10 deployment events for that stack\n\n5. **List Lambda Functions**: Use list_lambda_functions to show all FOD Lambda functions\n\n6. **Get Lambda Metrics**: Pick the first Lambda function and use get_lambda_metrics to show:\n   - Invocations (last 1 hour)\n   - Errors (last 1 hour)\n   - Duration (last 1 hour)\n\nFor each test:\n- Show what tool you're calling\n- Display the results clearly\n- Note any errors or issues\n- Provide a summary at the end\n\nThis helps verify that:\n✅ AWS credentials are configured correctly\n✅ All MCP tools are working\n✅ CloudFormation stacks are accessible\n✅ Lambda functions are deployed\n✅ CloudWatch metrics are available"
+  },
+  "workspaceFolderName": "AWS-Kiro",
+  "shortName": "test-aws-operations-mcp"
+}

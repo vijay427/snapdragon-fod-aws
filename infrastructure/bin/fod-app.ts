@@ -7,6 +7,7 @@ import { ComputeStack } from '../lib/compute-stack';
 import { ApiStack } from '../lib/api-stack';
 import { IoTStack } from '../lib/iot-stack';
 import { MonitoringStack } from '../lib/monitoring-stack';
+import { PipelineStack } from '../lib/pipeline-stack';
 
 const app = new cdk.App();
 

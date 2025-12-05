@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Smart Commit and Create PR",
+  "description": "Commits changes with AI-generated message and creates a pull request using GitHub MCP server",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "I have uncommitted changes in my repository. Please:\n\n1. Review the git diff to understand what changed\n2. Generate an appropriate commit message following conventional commits format (feat:, fix:, docs:, etc.)\n3. After I confirm, use the GitHub MCP server to create a pull request with:\n   - A clear title summarizing the changes\n   - A detailed description of what was changed and why\n   - Reference any related issues if applicable\n\nPlease start by showing me what files have changed and your suggested commit message."
+  }
+}

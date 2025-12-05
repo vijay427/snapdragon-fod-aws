@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Sync Spec Tasks with GitHub Issues",
+  "description": "When spec tasks are updated, sync them with GitHub issues",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      ".kiro/specs/**/tasks.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The spec tasks file was updated. Please:\n\n1. Read the tasks.md file that was modified\n2. Identify any new tasks that were added\n3. For each new task, use the GitHub MCP server to:\n   - Check if an issue already exists for this task\n   - If not, create a new issue with:\n     * Title: Task description\n     * Body: Task details, requirements references, and acceptance criteria\n     * Labels: 'task', 'spec', and priority level\n     * Milestone: Link to the spec milestone if it exists\n\n4. Update me with which issues were created or already exist.\n\nThis keeps GitHub issues in sync with your spec-driven development."
+  }
+}

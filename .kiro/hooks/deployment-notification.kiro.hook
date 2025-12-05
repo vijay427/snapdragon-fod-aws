@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Deployment Notification to GitHub",
+  "description": "After deploying infrastructure, create a GitHub issue documenting the deployment",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "infrastructure/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Infrastructure code was modified. After the next successful deployment, please:\n\n1. Use the AWS Operations MCP server to check the deployment status\n2. If deployment is successful, use the GitHub MCP server to:\n   - Create a deployment record issue with:\n     * Title: 'Deployment: [Stack Name] - [Date]'\n     * Body: List of changes, stack outputs, and deployment time\n     * Labels: 'deployment', 'infrastructure'\n   - Or update an existing deployment tracking issue\n\nThis helps maintain a deployment history in GitHub issues."
+  }
+}
