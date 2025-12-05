@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Restart Snapdragon Simulator",
+  "description": "When you update the simulator code, automatically restart the simulator process",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "mcp-servers/snapdragon-simulator/**/*.ts",
+      "mcp-servers/snapdragon-simulator/**/*.js",
+      "mcp-servers/snapdragon-simulator/**/*.py"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "npm run simulator:restart"
+  }
+}

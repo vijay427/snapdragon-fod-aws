@@ -1,0 +1,24 @@
+{
+  "name": "@fod/aws-operations-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for AWS operations in FOD system",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "@aws-sdk/client-cloudformation": "^3.600.0",
+    "@aws-sdk/client-lambda": "^3.600.0",
+    "@aws-sdk/client-cloudwatch": "^3.600.0",
+    "@aws-sdk/client-iot": "^3.600.0",
+    "@aws-sdk/client-secrets-manager": "^3.600.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

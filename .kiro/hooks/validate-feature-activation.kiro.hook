@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Validate Feature Activation Logic",
+  "description": "When modifying feature activation logic, automatically validate against requirements",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/lambda/activation-handler/**/*.ts",
+      "src/lambda/test-activation-handler/**/*.ts",
+      "src/shared/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A file in the feature activation system has been modified. Please validate this change against the requirements documented in .kiro/specs/snapdragon-fod-aws/requirements.md. Specifically check:\n\n1) Transaction processing (Requirement 1.1) - Verify that feature activation properly handles payment transactions and ensures atomicity\n2) Time-limited activation (Requirements 1.2, 1.5) - Confirm that temporary feature activations have proper expiration handling and time-based logic\n3) Feature configuration (Requirement 1.4) - Validate that feature configuration parameters are correctly applied and validated\n4) State persistence (Requirement 1.6) - Ensure that feature activation state is properly persisted and can survive system restarts\n\nReview the modified code and provide feedback on compliance with these requirements."
+  }
+}

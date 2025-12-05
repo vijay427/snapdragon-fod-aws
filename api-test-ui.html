@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOD System - API Testing Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .api-url {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: monospace;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .method-badge {
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 0.7em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .method-post { background: #10b981; }
+        .method-get { background: #3b82f6; }
+        .method-delete { background: #ef4444; }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .output-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .output-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-success {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .info-box {
+            background: #e0e7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: #4c51bf;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 FOD System - API Testing Dashboard</h1>
+            <p>Feature on Demand - Snapdragon Digital Chassis</p>
+            <div class="api-url" id="apiUrl">API URL: https://zmko5jd2g5.execute-api.us-east-1.amazonaws.com/v1/</div>
+        </div>
+
+        <div class="info-box">
+            <p><strong>✅ Active Endpoints (3):</strong> Test Activation, Get Vehicle Features, Feature Catalog</p>
+            <p><strong>⏸️ Commented Out:</strong> Purchase, Activate, Deactivate, ACK (require MongoDB - will be enabled once MongoDB is working)</p>
+            <p><strong>�  Quick Start:</strong> Fill in the form fields and click the button to test each API endpoint.</p>
+            <button onclick="testConnection()" style="margin-top: 10px; width: auto; padding: 10px 20px; font-size: 0.9em;">🔌 Test API Connection</button>
+        </div>
+
+        <div class="grid">
+            <!-- COMMENTED OUT - Needs MongoDB -->
+            <!-- Purchase Feature -->
+            <!--
+            <div class="card">
+                <h2>
+                    <span class="method-badge method-post">POST</span>
+                    Purchase Feature
+                </h2>
+                <div class="input-group">
+                    <label>Vehicle ID</label>
+                    <input type="text" id="purchase-vehicleId" value="VIN1234567890" placeholder="e.g., VIN1234567890">
+                </div>
+                <div class="input-group">
+                    <label>Feature ID</label>
+                    <select id="purchase-featureId">
+                        <option value="SPORT_MODE">Sport Mode</option>
+                        <option value="CONNECTIVITY_5G">5G Connectivity</option>
+                        <option value="PREMIUM_AUDIO">Premium Audio</option>
+                        <option value="AUTOPILOT">Autopilot</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Duration (hours)</label>
+                    <input type="number" id="purchase-duration" value="48" placeholder="48">
+                </div>
+                <button onclick="purchaseFeature()">💳 Purchase Feature</button>
+            </div>
+            -->
+
+            <!-- Test Activation (Complete Flow) -->
+            <div class="card" style="border: 3px solid #10b981;">
+                <h2>
+                    <span class="method-badge method-post">POST</span>
+                    Test Activation (Complete Flow) 🎯
+                </h2>
+                <div class="info-box" style="background: #d1fae5; border-left-color: #10b981; margin-bottom: 15px;">
+                    <p style="color: #065f46;"><strong>🚀 Complete End-to-End Test:</strong> API Gateway → Lambda → ngrok → HTTP Bridge → MCP Simulator</p>
+                </div>
+                <div class="input-group">
+                    <label>Vehicle ID</label>
+                    <input type="text" id="test-vehicleId" value="VIN1234567890" placeholder="e.g., VIN1234567890">
+                </div>
+                <div class="input-group">
+                    <label>Feature ID</label>
+                    <select id="test-featureId">
+                        <option value="SPORT_MODE">Sport Mode</option>
+                        <option value="CONNECTIVITY_5G">5G Connectivity</option>
+                        <option value="PREMIUM_AUDIO">Premium Audio</option>
+                        <option value="AUTOPILOT">Autopilot</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>User ID</label>
+                    <input type="text" id="test-userId" value="demo-user-123" placeholder="e.g., demo-user-123">
+                </div>
+                <div class="input-group">
+                    <label>Duration (hours)</label>
+                    <input type="number" id="test-duration" value="48" placeholder="48">
+                </div>
+                <button onclick="testActivation()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">🎯 Test Complete Flow</button>
+            </div>
+
+            <!-- COMMENTED OUT - Needs MongoDB -->
+            <!-- Activate Feature -->
+            <!--
+            <div class="card">
+                <h2>
+                    <span class="method-badge method-post">POST</span>
+                    Activate Feature
+                </h2>
+                <div class="input-group">
+                    <label>Vehicle ID</label>
+                    <input type="text" id="activate-vehicleId" value="VIN1234567890" placeholder="e.g., VIN1234567890">
+                </div>
+                <div class="input-group">
+                    <label>Feature ID</label>
+                    <select id="activate-featureId">
+                        <option value="SPORT_MODE">Sport Mode</option>
+                        <option value="CONNECTIVITY_5G">5G Connectivity</option>
+                        <option value="PREMIUM_AUDIO">Premium Audio</option>
+                        <option value="AUTOPILOT">Autopilot</option>
+                    </select>
+                </div>
+                <button onclick="activateFeature()">⚡ Activate Feature</button>
+            </div>
+            -->
+
+            <!-- COMMENTED OUT - Needs MongoDB -->
+            <!-- Deactivate Feature -->
+            <!--
+            <div class="card">
+                <h2>
+                    <span class="method-badge method-delete">DELETE</span>
+                    Deactivate Feature
+                </h2>
+                <div class="input-group">
+                    <label>Vehicle ID</label>
+                    <input type="text" id="deactivate-vehicleId" value="VIN1234567890" placeholder="e.g., VIN1234567890">
+                </div>
+                <div class="input-group">
+                    <label>Feature ID</label>
+                    <select id="deactivate-featureId">
+                        <option value="SPORT_MODE">Sport Mode</option>
+                        <option value="CONNECTIVITY_5G">5G Connectivity</option>
+                        <option value="PREMIUM_AUDIO">Premium Audio</option>
+                        <option value="AUTOPILOT">Autopilot</option>
+                    </select>
+                </div>
+                <button onclick="deactivateFeature()">🛑 Deactivate Feature</button>
+            </div>
+            -->
+
+            <!-- Get Vehicle Features -->
+            <div class="card">
+                <h2>
+                    <span class="method-badge method-get">GET</span>
+                    Get Vehicle Features
+                </h2>
+                <div class="input-group">
+                    <label>Vehicle ID</label>
+                    <input type="text" id="get-vehicleId" value="VIN1234567890" placeholder="e.g., VIN1234567890">
+                </div>
+                <button onclick="getVehicleFeatures()">📋 Get Features</button>
+            </div>
+
+            <!-- Get Feature Catalog -->
+            <div class="card">
+                <h2>
+                    <span class="method-badge method-get">GET</span>
+                    Feature Catalog
+                </h2>
+                <p style="color: #666; margin-bottom: 15px;">View all available features in the system</p>
+                <button onclick="getFeatureCatalog()">📚 Get Catalog</button>
+            </div>
+
+            <!-- COMMENTED OUT - Needs MongoDB -->
+            <!-- Simulate Vehicle ACK -->
+            <!--
+            <div class="card">
+                <h2>
+                    <span class="method-badge method-post">POST</span>
+                    Simulate Vehicle ACK
+                </h2>
+                <div class="input-group">
+                    <label>Vehicle ID</label>
+                    <input type="text" id="ack-vehicleId" value="VIN1234567890" placeholder="e.g., VIN1234567890">
+                </div>
+                <div class="input-group">
+                    <label>Feature ID</label>
+                    <input type="text" id="ack-featureId" value="SPORT_MODE" placeholder="e.g., SPORT_MODE">
+                </div>
+                <div class="input-group">
+                    <label>Status</label>
+                    <select id="ack-status">
+                        <option value="SUCCESS">Success</option>
+                        <option value="FAILED">Failed</option>
+                        <option value="PARTIAL">Partial</option>
+                    </select>
+                </div>
+                <button onclick="simulateAck()">✅ Send ACK</button>
+            </div>
+            -->
+        </div>
+
+        <div class="output-section">
+            <h2>📡 API Response</h2>
+            <div class="output" id="output">Waiting for API call...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://zmko5jd2g5.execute-api.us-east-1.amazonaws.com/v1';
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌ ERROR' : type === 'success' ? '✅ SUCCESS' : '📡 INFO';
+            output.textContent = `[${timestamp}] ${prefix}\n${message}\n\n${output.textContent}`;
+        }
+
+        async function makeRequest(method, endpoint, body = null) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML += '<span class="loading"></span>';
+
+            // Clear previous output
+            const output = document.getElementById('output');
+            output.textContent = 'Loading...';
+
+            try {
+                const fullUrl = `${API_BASE_URL}${endpoint}`;
+                log(`Making ${method} request to:\n${fullUrl}`, 'info');
+                
+                const options = {
+                    method: method,
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                };
+
+                if (body) {
+                    options.body = JSON.stringify(body);
+                    log(`Request Body:\n${JSON.stringify(body, null, 2)}`, 'info');
+                }
+
+                const response = await fetch(fullUrl, options);
+                
+                // Try to parse response as JSON
+                let data;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    data = { message: text };
+                }
+
+                if (response.ok) {
+                    log(`✅ Response (${response.status}):\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    log(`❌ Response (${response.status}):\n${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Network Error:\n${error.message}\n\nPossible causes:\n1. CORS not enabled on API Gateway\n2. API Gateway not deployed\n3. Network/firewall blocking request\n4. Invalid API URL\n\nTry opening browser DevTools (F12) → Network tab for more details`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = btn.innerHTML.replace('<span class="loading"></span>', '');
+            }
+        }
+
+        function purchaseFeature() {
+            const vehicleId = document.getElementById('purchase-vehicleId').value;
+            const featureId = document.getElementById('purchase-featureId').value;
+            const duration = parseInt(document.getElementById('purchase-duration').value);
+
+            makeRequest('POST', '/features/purchase', {
+                vehicleId,
+                featureId,
+                duration
+            });
+        }
+
+        function activateFeature() {
+            const vehicleId = document.getElementById('activate-vehicleId').value;
+            const featureId = document.getElementById('activate-featureId').value;
+
+            makeRequest('POST', '/features/activate', {
+                vehicleId,
+                featureId
+            });
+        }
+
+        function testActivation() {
+            const vehicleId = document.getElementById('test-vehicleId').value;
+            const featureId = document.getElementById('test-featureId').value;
+            const userId = document.getElementById('test-userId').value;
+            const duration = parseInt(document.getElementById('test-duration').value);
+
+            log('🎯 Testing COMPLETE FLOW: API Gateway → Lambda → ngrok → HTTP Bridge → MCP Simulator', 'info');
+            
+            makeRequest('POST', '/test-activation', {
+                vehicleId,
+                featureId,
+                userId,
+                duration
+            });
+        }
+
+        function deactivateFeature() {
+            const vehicleId = document.getElementById('deactivate-vehicleId').value;
+            const featureId = document.getElementById('deactivate-featureId').value;
+
+            makeRequest('DELETE', `/vehicles/${vehicleId}/features/${featureId}`);
+        }
+
+        function getVehicleFeatures() {
+            const vehicleId = document.getElementById('get-vehicleId').value;
+            makeRequest('GET', `/vehicles/${vehicleId}/features`);
+        }
+
+        function getFeatureCatalog() {
+            makeRequest('GET', '/features/catalog');
+        }
+
+        function simulateAck() {
+            const vehicleId = document.getElementById('ack-vehicleId').value;
+            const featureId = document.getElementById('ack-featureId').value;
+            const status = document.getElementById('ack-status').value;
+
+            log('Note: This simulates what a vehicle would send via IoT Core', 'info');
+            
+            makeRequest('POST', '/test/ack', {
+                vehicleId,
+                featureId,
+                status,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        async function testConnection() {
+            // Clear previous output
+            const output = document.getElementById('output');
+            output.textContent = 'Testing connection...';
+            
+            log('Testing API connection...', 'info');
+            log(`API URL: ${API_BASE_URL}`, 'info');
+            
+            try {
+                // Try a simple OPTIONS request first
+                const response = await fetch(API_BASE_URL, {
+                    method: 'OPTIONS',
+                    mode: 'cors'
+                });
+                
+                log(`✅ API is reachable! Status: ${response.status}`, 'success');
+                log(`CORS Headers:\n${JSON.stringify(Object.fromEntries(response.headers), null, 2)}`, 'info');
+                
+                // Now try the actual endpoint
+                log('\nTrying actual endpoint...', 'info');
+                const testResponse = await fetch(`${API_BASE_URL}/features/catalog`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                log(`Endpoint response: ${testResponse.status}`, testResponse.ok ? 'success' : 'error');
+                
+            } catch (error) {
+                log(`❌ Connection test failed:\n${error.message}\n\nThis means:\n- API Gateway might not be deployed\n- CORS might not be configured\n- Network/firewall blocking\n\nSolution: Redeploy API stack with CORS enabled`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,509 @@
+{
+  "info": {
+    "name": "FOD System - Feature on Demand API",
+    "description": "Complete API collection for Snapdragon Digital Chassis Feature on Demand system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://zmko5jd2g5.execute-api.us-east-1.amazonaws.com/v1",
+      "type": "string"
+    },
+    {
+      "key": "vehicleId",
+      "value": "VIN1234567890",
+      "type": "string"
+    },
+    {
+      "key": "featureId",
+      "value": "SPORT_MODE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Purchase Feature",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"featureId\": \"{{featureId}}\",\n  \"paymentMethod\": \"credit_card\",\n  \"paymentToken\": \"tok_visa_4242\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/features/purchase",
+          "host": ["{{baseUrl}}"],
+          "path": ["features", "purchase"]
+        },
+        "description": "Purchase a feature for a vehicle. Creates a transaction and subscription."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Activate Feature",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"featureId\": \"{{featureId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/features/activate",
+          "host": ["{{baseUrl}}"],
+          "path": ["features", "activate"]
+        },
+        "description": "Activate a purchased feature on the vehicle via IoT Core."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Deactivate Feature",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/features/{{featureId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "{{vehicleId}}", "features", "{{featureId}}"]
+        },
+        "description": "Deactivate an active feature on the vehicle."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Get Vehicle Features",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/features",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "{{vehicleId}}", "features"]
+        },
+        "description": "Get all active features for a specific vehicle."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Get Feature Catalog",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/features/catalog",
+          "host": ["{{baseUrl}}"],
+          "path": ["features", "catalog"]
+        },
+        "description": "Get all available features in the system catalog."
+      },
+      "response": []
+    },
+    {
+      "name": "Examples",
+      "item": [
+        {
+          "name": "Purchase Sport Mode (48 hours)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"VIN1234567890\",\n  \"featureId\": \"SPORT_MODE\",\n  \"paymentMethod\": \"credit_card\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "purchase"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Purchase 5G Connectivity (Permanent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"VIN1234567890\",\n  \"featureId\": \"CONNECTIVITY_5G\",\n  \"paymentMethod\": \"credit_card\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "purchase"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Purchase Premium Audio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"VIN1234567890\",\n  \"featureId\": \"PREMIUM_AUDIO\",\n  \"paymentMethod\": \"paypal\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "purchase"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Sport Mode",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"VIN1234567890\",\n  \"featureId\": \"SPORT_MODE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "activate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Sport Mode",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/VIN1234567890/features/SPORT_MODE",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "VIN1234567890", "features", "SPORT_MODE"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Features for Vehicle VIN123",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/VIN1234567890/features",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "VIN1234567890", "features"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Scenarios",
+      "item": [
+        {
+          "name": "Invalid Vehicle ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"\",\n  \"featureId\": \"SPORT_MODE\",\n  \"paymentMethod\": \"credit_card\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "purchase"]
+            },
+            "description": "Test validation error for empty vehicle ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Feature ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"VIN1234567890\",\n  \"featureId\": \"INVALID_FEATURE\",\n  \"paymentMethod\": \"credit_card\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "purchase"]
+            },
+            "description": "Test feature not found error"
+          },
+          "response": []
+        },
+        {
+          "name": "Missing Payment Method",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"VIN1234567890\",\n  \"featureId\": \"SPORT_MODE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "purchase"]
+            },
+            "description": "Test validation error for missing payment method"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Complete Flow Test",
+      "item": [
+        {
+          "name": "Step 1: Get Catalog",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has features\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.features).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/catalog",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "catalog"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step 2: Purchase Feature",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Purchase successful\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.transactionId).to.exist;",
+                  "    pm.expect(jsonData.data.subscriptionId).to.exist;",
+                  "    ",
+                  "    // Save for next requests",
+                  "    pm.collectionVariables.set(\"subscriptionId\", jsonData.data.subscriptionId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"featureId\": \"{{featureId}}\",\n  \"paymentMethod\": \"credit_card\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "purchase"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step 3: Activate Feature",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Activation initiated\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.status).to.eql('ACTIVATING');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"featureId\": \"{{featureId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["features", "activate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step 4: Get Vehicle Features",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Vehicle has features\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.features).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/features",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "{{vehicleId}}", "features"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Step 5: Deactivate Feature",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Deactivation successful\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.status).to.eql('DEACTIVATED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/features/{{featureId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "{{vehicleId}}", "features", "{{featureId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

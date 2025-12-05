@@ -1,0 +1,31 @@
+{
+  "name": "fod-infrastructure",
+  "version": "1.0.0",
+  "description": "AWS CDK infrastructure for Snapdragon FOD system",
+  "bin": {
+    "fod-infrastructure": "bin/fod-app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "deploy": "cdk deploy --all",
+    "deploy:dev": "cdk deploy --all --context environment=dev",
+    "deploy:prod": "cdk deploy --all --context environment=prod --require-approval broadening",
+    "diff": "cdk diff",
+    "synth": "cdk synth",
+    "destroy": "cdk destroy --all"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "aws-cdk": "^2.100.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.100.0",
+    "constructs": "^10.0.0",
+    "esbuild": "^0.27.1",
+    "source-map-support": "^0.5.21"
+  }
+}
