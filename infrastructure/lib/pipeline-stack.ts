@@ -5,6 +5,8 @@ import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Construct } from 'constructs';
 
 export interface PipelineStackProps extends cdk.StackProps {
@@ -12,6 +14,7 @@ export interface PipelineStackProps extends cdk.StackProps {
   githubRepo: string;
   githubOwner: string;
   githubBranch: string;
+  notificationEmail?: string;
 }
 
 export class PipelineStack extends cdk.Stack {

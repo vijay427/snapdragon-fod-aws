@@ -1,0 +1,23 @@
+{
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.git/**": true,
+    "**/infrastructure/node_modules/**": true,
+    "**/infrastructure/cdk.out/**": true,
+    "**/mcp-servers/**/node_modules/**": true,
+    "**/mcp-servers/**/dist/**": true
+  },
+  "files.exclude": {
+    "**/node_modules": false,
+    "**/dist": false
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.git": true,
+    "**/infrastructure/cdk.out": true
+  }
+}

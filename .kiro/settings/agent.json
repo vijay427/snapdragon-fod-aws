@@ -1,0 +1,15 @@
+{
+  "maxConcurrentExecutions": 2,
+  "executionTimeout": 300000,
+  "enableBackgroundProcessing": false,
+  "cacheEnabled": true,
+  "maxHistorySize": 50,
+  "hooks": {
+    "autoTrigger": false,
+    "maxConcurrentHooks": 1
+  },
+  "maxContextTokens": 50000,
+  "processCleanup": true,
+  "idleTimeout": 60000,
+  "memoryLimit": "2GB"
+}

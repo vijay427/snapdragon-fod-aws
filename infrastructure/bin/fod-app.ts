@@ -74,6 +74,23 @@ const monitoringStack = new MonitoringStack(app, `${stackPrefix}-Monitoring-${en
 monitoringStack.addDependency(apiStack);
 monitoringStack.addDependency(iotStack);
 
+// CI/CD Pipeline Stack (optional - only deploy if GitHub token is configured)
+const githubOwner = app.node.tryGetContext('githubOwner') || process.env.GITHUB_OWNER;
+const githubRepo = app.node.tryGetContext('githubRepo') || process.env.GITHUB_REPO || 'snapdragon-fod-aws';
+const githubBranch = app.node.tryGetContext('githubBranch') || process.env.GITHUB_BRANCH || 'main';
+
+if (githubOwner) {
+  const pipelineStack = new PipelineStack(app, `${stackPrefix}-Pipeline-${environment}`, {
+    env,
+    environment,
+    githubOwner,
+    githubRepo,
+    githubBranch,
+    description: 'CI/CD pipeline for automated Lambda deployment',
+  });
+  pipelineStack.addDependency(monitoringStack);
+}
+
 // Add tags to all stacks
 cdk.Tags.of(app).add('Project', 'Snapdragon-FOD');
 cdk.Tags.of(app).add('Environment', environment);
