@@ -1,0 +1,273 @@
+name: Lambda CI/CD Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+env:
+  NODE_VERSION: '18'
+  AWS_REGION: 'us-east-1'
+
+jobs:
+  detect-changes:
+    name: Detect Lambda Changes
+    runs-on: ubuntu-latest
+    outputs:
+      lambdas: ${{ steps.detect.outputs.lambdas }}
+      has_changes: ${{ steps.detect.outputs.has_changes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed Lambda functions
+        id: detect
+        run: |
+          # Get all Lambda directories
+          LAMBDA_DIRS=$(find src/lambda -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+          
+          # Check for changes in last commit or all lambdas if forced
+          CHANGED_LAMBDAS=""
+          for dir in $LAMBDA_DIRS; do
+            if git diff --name-only HEAD~1 HEAD | grep -q "src/lambda/$dir/"; then
+              CHANGED_LAMBDAS="$CHANGED_LAMBDAS $dir"
+            fi
+          done
+          
+          # If no changes detected, deploy all (for manual trigger)
+          if [ -z "$CHANGED_LAMBDAS" ]; then
+            CHANGED_LAMBDAS="$LAMBDA_DIRS"
+          fi
+          
+          # Convert to JSON array
+          LAMBDAS_JSON=$(echo $CHANGED_LAMBDAS | jq -R -s -c 'split(" ") | map(select(length > 0))')
+          
+          echo "lambdas=$LAMBDAS_JSON" >> $GITHUB_OUTPUT
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          
+          echo "Detected Lambda functions to deploy:"
+          echo $LAMBDAS_JSON | jq .
+
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd infrastructure
+          npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            dist/
+            src/
+            package.json
+            package-lock.json
+          retention-days: 7
+
+  deploy-lambdas:
+    name: Deploy Lambda Functions
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-and-test]
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    strategy:
+      matrix:
+        lambda: ${{ fromJson(needs.detect-changes.outputs.lambdas) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get Lambda function name
+        id: lambda-name
+        run: |
+          # Convert directory name to Lambda function name
+          # e.g., activation-handler -> FOD-ActivationHandler-dev
+          LAMBDA_DIR="${{ matrix.lambda }}"
+          
+          # Convert kebab-case to PascalCase
+          PASCAL_CASE=$(echo $LAMBDA_DIR | sed -r 's/(^|-)([a-z])/\U\2/g')
+          
+          FUNCTION_NAME="FOD-${PASCAL_CASE}-${{ github.event.inputs.environment }}"
+          echo "function_name=$FUNCTION_NAME" >> $GITHUB_OUTPUT
+          echo "Deploying to Lambda: $FUNCTION_NAME"
+
+      - name: Package Lambda function
+        run: |
+          mkdir -p lambda-package
+          
+          # Copy built JavaScript files
+          if [ -f "dist/lambda/${{ matrix.lambda }}/index.js" ]; then
+            cp dist/lambda/${{ matrix.lambda }}/index.js lambda-package/
+          fi
+          
+          # Copy TypeScript source (for CDK deployment)
+          if [ -f "src/lambda/${{ matrix.lambda }}/index.ts" ]; then
+            cp src/lambda/${{ matrix.lambda }}/index.ts lambda-package/
+          fi
+          
+          # Copy shared dependencies
+          if [ -d "dist/shared" ]; then
+            cp -r dist/shared lambda-package/
+          fi
+          
+          # Copy package.json for dependencies
+          cp package.json lambda-package/
+          
+          # Install production dependencies only
+          cd lambda-package
+          npm ci --production
+          
+          # Create deployment package
+          zip -r ../lambda-deployment.zip .
+          cd ..
+
+      - name: Update Lambda function code
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ steps.lambda-name.outputs.function_name }} \
+            --zip-file fileb://lambda-deployment.zip \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name ${{ steps.lambda-name.outputs.function_name }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Verify deployment
+        run: |
+          # Get function configuration
+          aws lambda get-function-configuration \
+            --function-name ${{ steps.lambda-name.outputs.function_name }} \
+            --region ${{ env.AWS_REGION }} \
+            --query '{Name:FunctionName,Runtime:Runtime,LastModified:LastModified,State:State}' \
+            --output table
+
+  deploy-infrastructure:
+    name: Deploy CDK Infrastructure
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-and-test]
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd infrastructure
+          npm ci
+          npm install -g aws-cdk
+
+      - name: CDK Synth
+        run: |
+          cd infrastructure
+          cdk synth --context environment=${{ github.event.inputs.environment }}
+
+      - name: CDK Deploy Compute Stack
+        run: |
+          cd infrastructure
+          cdk deploy FOD-Compute-${{ github.event.inputs.environment }} \
+            --require-approval never \
+            --context environment=${{ github.event.inputs.environment }}
+
+  post-deployment:
+    name: Post-Deployment Verification
+    runs-on: ubuntu-latest
+    needs: [deploy-lambdas, deploy-infrastructure]
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get Lambda metrics
+        run: |
+          echo "Checking Lambda function health..."
+          
+          # List all FOD Lambda functions
+          FUNCTIONS=$(aws lambda list-functions \
+            --query "Functions[?starts_with(FunctionName, 'FOD-')].FunctionName" \
+            --output text)
+          
+          for func in $FUNCTIONS; do
+            echo "Function: $func"
+            aws cloudwatch get-metric-statistics \
+              --namespace AWS/Lambda \
+              --metric-name Errors \
+              --dimensions Name=FunctionName,Value=$func \
+              --start-time $(date -u -d '5 minutes ago' +%Y-%m-%dT%H:%M:%S) \
+              --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
+              --period 300 \
+              --statistics Sum \
+              --query 'Datapoints[0].Sum' \
+              --output text
+          done
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Region: ${{ env.AWS_REGION }}"
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
