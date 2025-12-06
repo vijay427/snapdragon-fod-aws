@@ -1,0 +1,9 @@
+{
+    "kiroAgent.configureMCP": "Enabled",
+    "extensions.experimental.affinity": {},
+    "remote.extensionKind": {
+        "*": [
+            "ui"
+        ]
+    }
+}

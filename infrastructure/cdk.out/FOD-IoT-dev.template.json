@@ -1,0 +1,158 @@
+{
+ "Description": "IoT Core infrastructure for vehicle communication",
+ "Resources": {
+  "VehicleAckRule": {
+   "Type": "AWS::IoT::TopicRule",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ],
+    "TopicRulePayload": {
+     "Actions": [
+      {
+       "Lambda": {
+        "FunctionArn": {
+         "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttAckHandlerBEB0619EArn1C6D6D9E"
+        }
+       }
+      }
+     ],
+     "Description": "Route vehicle acknowledgments to ACK handler",
+     "RuleDisabled": false,
+     "Sql": "SELECT * FROM 'vehicle/+/feature/ack'"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-IoT-dev/VehicleAckRule"
+   }
+  },
+  "VehiclePolicy": {
+   "Type": "AWS::IoT::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Effect": "Allow",
+       "Action": [
+        "iot:Connect"
+       ],
+       "Resource": [
+        "arn:aws:iot:us-east-1:585473054650:client/${iot:Connection.Thing.ThingName}"
+       ]
+      },
+      {
+       "Effect": "Allow",
+       "Action": [
+        "iot:Subscribe"
+       ],
+       "Resource": [
+        "arn:aws:iot:us-east-1:585473054650:topicfilter/vehicle/${iot:Connection.Thing.ThingName}/feature/*"
+       ]
+      },
+      {
+       "Effect": "Allow",
+       "Action": [
+        "iot:Receive"
+       ],
+       "Resource": [
+        "arn:aws:iot:us-east-1:585473054650:topic/vehicle/${iot:Connection.Thing.ThingName}/feature/*"
+       ]
+      },
+      {
+       "Effect": "Allow",
+       "Action": [
+        "iot:Publish"
+       ],
+       "Resource": [
+        "arn:aws:iot:us-east-1:585473054650:topic/vehicle/${iot:Connection.Thing.ThingName}/feature/ack",
+        "arn:aws:iot:us-east-1:585473054650:topic/vehicle/${iot:Connection.Thing.ThingName}/telemetry"
+       ]
+      }
+     ]
+    },
+    "PolicyName": "FOD-IoT-dev-VehiclePolicy",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-IoT-dev/VehiclePolicy"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/yXGQQ6DIBAAwLd4hy2uT/ABbah3QwGTVQRTFklj/LsxPc0gYNeCakzN0rpFBvrA8WZjF2FqHikxHP0Uh7SR1SV40U/xlQLZ33n3WXgrfIqYnIc5P3ZEQAWqmTOR/JbItHrQfy8/P1FQbAAAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-IoT-dev/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "IoTEndpoint": {
+   "Description": "IoT Core endpoint for vehicle connections",
+   "Value": "585473054650.iot.us-east-1.amazonaws.com",
+   "Export": {
+    "Name": "FOD-IoT-dev-IoTEndpoint"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

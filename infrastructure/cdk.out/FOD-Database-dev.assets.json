@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "27d76769227f4cfbeef7860f570bd66bc881da63c45405dd09f27d5e5a29f03c": {
+      "displayName": "FOD-Database-dev Template",
+      "source": {
+        "path": "FOD-Database-dev.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "585473054650-us-east-1-faba7da7": {
+          "bucketName": "cdk-hnb659fds-assets-585473054650-us-east-1",
+          "objectKey": "27d76769227f4cfbeef7860f570bd66bc881da63c45405dd09f27d5e5a29f03c.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::585473054650:role/cdk-hnb659fds-file-publishing-role-585473054650-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

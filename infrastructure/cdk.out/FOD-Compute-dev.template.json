@@ -1,0 +1,1151 @@
+{
+ "Description": "Lambda functions for FOD system",
+ "Resources": {
+  "CatalogHandlerServiceRoleDEF06A69": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/CatalogHandler/ServiceRole/Resource"
+   }
+  },
+  "CatalogHandler84C59375": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-585473054650-us-east-1",
+     "S3Key": "52985c7e32bd669b0c1c061f3cc0a9ec5c25769004cb42b5437db761a88d9069.zip"
+    },
+    "Description": "Returns feature catalog",
+    "Environment": {
+     "Variables": {
+      "NODE_ENV": "production",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "MONGODB_SECRET_NAME": "DatabaseStack/mongodb-connection",
+      "MONGODB_URI": "mongodb+srv://fod-user:fod-user@cluster.mongodb.net/fod-system?retryWrites=true&w=majority"
+     }
+    },
+    "FunctionName": "FOD-Compute-dev-CatalogHandler",
+    "Handler": "index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "CatalogHandlerServiceRoleDEF06A69",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "CatalogHandlerServiceRoleDEF06A69"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/CatalogHandler/Resource",
+    "aws:asset:path": "asset.52985c7e32bd669b0c1c061f3cc0a9ec5c25769004cb42b5437db761a88d9069",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "GetVehicleFeaturesHandlerServiceRole1F2D8260": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/GetVehicleFeaturesHandler/ServiceRole/Resource"
+   }
+  },
+  "GetVehicleFeaturesHandlerC1A18575": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-585473054650-us-east-1",
+     "S3Key": "89e85a972e8191a1533fce1e5e78a704510126672ab43e32abbe93187aa26251.zip"
+    },
+    "Description": "Returns active features for a vehicle",
+    "Environment": {
+     "Variables": {
+      "NODE_ENV": "production",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "MONGODB_SECRET_NAME": "DatabaseStack/mongodb-connection",
+      "MONGODB_URI": "mongodb+srv://fod-user:fod-user@cluster.mongodb.net/fod-system?retryWrites=true&w=majority"
+     }
+    },
+    "FunctionName": "FOD-Compute-dev-GetVehicleFeaturesHandler",
+    "Handler": "index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "GetVehicleFeaturesHandlerServiceRole1F2D8260",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "GetVehicleFeaturesHandlerServiceRole1F2D8260"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/GetVehicleFeaturesHandler/Resource",
+    "aws:asset:path": "asset.89e85a972e8191a1533fce1e5e78a704510126672ab43e32abbe93187aa26251",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "PurchaseHandlerServiceRoleF612383F": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/PurchaseHandler/ServiceRole/Resource"
+   }
+  },
+  "PurchaseHandlerAC512787": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-585473054650-us-east-1",
+     "S3Key": "77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314.zip"
+    },
+    "Description": "Handles feature purchase requests",
+    "Environment": {
+     "Variables": {
+      "NODE_ENV": "production",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "MONGODB_SECRET_NAME": "DatabaseStack/mongodb-connection",
+      "MONGODB_URI": "mongodb+srv://fod-user:fod-user@cluster.mongodb.net/fod-system?retryWrites=true&w=majority"
+     }
+    },
+    "FunctionName": "FOD-Compute-dev-PurchaseHandler",
+    "Handler": "lambda/purchase-handler/index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "PurchaseHandlerServiceRoleF612383F",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "PurchaseHandlerServiceRoleF612383F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/PurchaseHandler/Resource",
+    "aws:asset:path": "asset.77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "PurchaseHandlerLogRetention72CAE506": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "PurchaseHandlerAC512787"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 90
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/PurchaseHandler/LogRetention/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:DeleteRetentionPolicy",
+        "logs:PutRetentionPolicy"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+    "Roles": [
+     {
+      "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Handler": "index.handler",
+    "Runtime": "nodejs22.x",
+    "Timeout": 900,
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-585473054650-us-east-1",
+     "S3Key": "2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+      "Arn"
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "DependsOn": [
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource",
+    "aws:asset:path": "asset.2819175352ad1ce0dae768e83fc328fb70fb5f10b4a8ff0ccbcb791f02b0716d",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ActivationHandlerServiceRoleB6F6F8CC": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/ActivationHandler/ServiceRole/Resource"
+   }
+  },
+  "ActivationHandler551A47DC": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-585473054650-us-east-1",
+     "S3Key": "77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314.zip"
+    },
+    "Description": "Handles feature activation after purchase",
+    "Environment": {
+     "Variables": {
+      "NODE_ENV": "production",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "MONGODB_SECRET_NAME": "DatabaseStack/mongodb-connection",
+      "MONGODB_URI": "mongodb+srv://fod-user:fod-user@cluster.mongodb.net/fod-system?retryWrites=true&w=majority"
+     }
+    },
+    "FunctionName": "FOD-Compute-dev-ActivationHandler",
+    "Handler": "lambda/activation-handler/index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "ActivationHandlerServiceRoleB6F6F8CC",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "ActivationHandlerServiceRoleB6F6F8CC"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/ActivationHandler/Resource",
+    "aws:asset:path": "asset.77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ActivationHandlerLogRetentionAE903C7A": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "ActivationHandler551A47DC"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 90
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/ActivationHandler/LogRetention/Resource"
+   }
+  },
+  "DeactivationHandlerServiceRole7DAB052E": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/DeactivationHandler/ServiceRole/Resource"
+   }
+  },
+  "DeactivationHandlerE24F71E4": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-585473054650-us-east-1",
+     "S3Key": "77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314.zip"
+    },
+    "Description": "Handles feature deactivation and expiration",
+    "Environment": {
+     "Variables": {
+      "NODE_ENV": "production",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "MONGODB_SECRET_NAME": "DatabaseStack/mongodb-connection",
+      "MONGODB_URI": "mongodb+srv://fod-user:fod-user@cluster.mongodb.net/fod-system?retryWrites=true&w=majority"
+     }
+    },
+    "FunctionName": "FOD-Compute-dev-DeactivationHandler",
+    "Handler": "lambda/deactivation-handler/index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "DeactivationHandlerServiceRole7DAB052E",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "DeactivationHandlerServiceRole7DAB052E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/DeactivationHandler/Resource",
+    "aws:asset:path": "asset.77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "DeactivationHandlerLogRetention38988910": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "DeactivationHandlerE24F71E4"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 90
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/DeactivationHandler/LogRetention/Resource"
+   }
+  },
+  "AckHandlerServiceRole87ECE13A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/AckHandler/ServiceRole/Resource"
+   }
+  },
+  "AckHandlerBEB0619E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-585473054650-us-east-1",
+     "S3Key": "77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314.zip"
+    },
+    "Description": "Processes acknowledgments from vehicles",
+    "Environment": {
+     "Variables": {
+      "NODE_ENV": "production",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "MONGODB_SECRET_NAME": "DatabaseStack/mongodb-connection",
+      "MONGODB_URI": "mongodb+srv://fod-user:fod-user@cluster.mongodb.net/fod-system?retryWrites=true&w=majority"
+     }
+    },
+    "FunctionName": "FOD-Compute-dev-AckHandler",
+    "Handler": "lambda/ack-handler/index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "AckHandlerServiceRole87ECE13A",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "AckHandlerServiceRole87ECE13A"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/AckHandler/Resource",
+    "aws:asset:path": "asset.77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "AckHandlerLogRetentionA5D2CC44": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "AckHandlerBEB0619E"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 90
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/AckHandler/LogRetention/Resource"
+   }
+  },
+  "AckHandlerIoTInvokePermission9CC5C566": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "AckHandlerBEB0619E",
+      "Arn"
+     ]
+    },
+    "Principal": "iot.amazonaws.com",
+    "SourceArn": "arn:aws:iot:us-east-1:585473054650:rule/*"
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/AckHandler/IoTInvokePermission"
+   }
+  },
+  "TestActivationHandlerServiceRole3FA146BA": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/TestActivationHandler/ServiceRole/Resource"
+   }
+  },
+  "TestActivationHandler3884EC3F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-585473054650-us-east-1",
+     "S3Key": "77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314.zip"
+    },
+    "Description": "Test endpoint for complete activation flow via HTTP Bridge",
+    "Environment": {
+     "Variables": {
+      "NODE_ENV": "production",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "MONGODB_SECRET_NAME": "DatabaseStack/mongodb-connection",
+      "MONGODB_URI": "mongodb+srv://fod-user:fod-user@cluster.mongodb.net/fod-system?retryWrites=true&w=majority",
+      "HTTP_BRIDGE_URL": "",
+      "HTTP_BRIDGE_API_KEY": "",
+      "HTTP_BRIDGE_TIMEOUT": "30000"
+     }
+    },
+    "FunctionName": "FOD-Compute-dev-TestActivationHandler",
+    "Handler": "lambda/test-activation-handler/index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "TestActivationHandlerServiceRole3FA146BA",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "TestActivationHandlerServiceRole3FA146BA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/TestActivationHandler/Resource",
+    "aws:asset:path": "asset.77684cbf949e65cbf3e356ec6df7786b2a35b644fd047c97cb70cb5f31bcb314",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "TestActivationHandlerLogRetention14C32D2D": {
+   "Type": "Custom::LogRetention",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+      "Arn"
+     ]
+    },
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "TestActivationHandler3884EC3F"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 90
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/TestActivationHandler/LogRetention/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2P0W6DMAxFv6XvwWPhC1akPU3rRD8ApcEgQ3Am7LSqEP8+EbQ+netr6ci2YKt3KE/uIYXvpiLQDdarOj8Z95B2DW6+da7l2OEo8J3xmdgrRTbkZlibGNDUPWf+xED+uY9H2oxUrRNBFfjYYaSCc/IT6tkJmkMPa93zy/oKuwWXmUQo8mZCHAS+4tCgImuuGpSYFo8mu6/qBuIhH/O/qHu+JP1Nupn9Bxjl7W4t2BLK0yhExZJYaUZoDv4BvE8HrhABAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-Compute-dev/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "PurchaseHandlerArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "PurchaseHandlerAC512787",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev-PurchaseHandlerArn"
+   }
+  },
+  "ActivationHandlerArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ActivationHandler551A47DC",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev-ActivationHandlerArn"
+   }
+  },
+  "TestActivationHandlerArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "TestActivationHandler3884EC3F",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev-TestActivationHandlerArn"
+   }
+  },
+  "ExportsOutputFnGetAttPurchaseHandlerAC512787Arn413F54FA": {
+   "Value": {
+    "Fn::GetAtt": [
+     "PurchaseHandlerAC512787",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputFnGetAttPurchaseHandlerAC512787Arn413F54FA"
+   }
+  },
+  "ExportsOutputFnGetAttActivationHandler551A47DCArnEC01A910": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ActivationHandler551A47DC",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputFnGetAttActivationHandler551A47DCArnEC01A910"
+   }
+  },
+  "ExportsOutputFnGetAttCatalogHandler84C59375ArnFBE8F0BD": {
+   "Value": {
+    "Fn::GetAtt": [
+     "CatalogHandler84C59375",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputFnGetAttCatalogHandler84C59375ArnFBE8F0BD"
+   }
+  },
+  "ExportsOutputFnGetAttGetVehicleFeaturesHandlerC1A18575ArnFFE697B4": {
+   "Value": {
+    "Fn::GetAtt": [
+     "GetVehicleFeaturesHandlerC1A18575",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputFnGetAttGetVehicleFeaturesHandlerC1A18575ArnFFE697B4"
+   }
+  },
+  "ExportsOutputFnGetAttDeactivationHandlerE24F71E4Arn6571CC14": {
+   "Value": {
+    "Fn::GetAtt": [
+     "DeactivationHandlerE24F71E4",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputFnGetAttDeactivationHandlerE24F71E4Arn6571CC14"
+   }
+  },
+  "ExportsOutputFnGetAttTestActivationHandler3884EC3FArn90118315": {
+   "Value": {
+    "Fn::GetAtt": [
+     "TestActivationHandler3884EC3F",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputFnGetAttTestActivationHandler3884EC3FArn90118315"
+   }
+  },
+  "ExportsOutputFnGetAttAckHandlerBEB0619EArn1C6D6D9E": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AckHandlerBEB0619E",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputFnGetAttAckHandlerBEB0619EArn1C6D6D9E"
+   }
+  },
+  "ExportsOutputRefPurchaseHandlerAC512787D1AFB450": {
+   "Value": {
+    "Ref": "PurchaseHandlerAC512787"
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputRefPurchaseHandlerAC512787D1AFB450"
+   }
+  },
+  "ExportsOutputRefActivationHandler551A47DC132C864F": {
+   "Value": {
+    "Ref": "ActivationHandler551A47DC"
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputRefActivationHandler551A47DC132C864F"
+   }
+  },
+  "ExportsOutputRefDeactivationHandlerE24F71E4986272EC": {
+   "Value": {
+    "Ref": "DeactivationHandlerE24F71E4"
+   },
+   "Export": {
+    "Name": "FOD-Compute-dev:ExportsOutputRefDeactivationHandlerE24F71E4986272EC"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

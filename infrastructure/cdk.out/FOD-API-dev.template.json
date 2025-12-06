@@ -1,0 +1,1367 @@
+{
+ "Description": "API Gateway and authentication for FOD system",
+ "Resources": {
+  "FODAPIEBB0FEC0": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "Feature on Demand API",
+    "Name": "FOD-API-dev-API",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Resource"
+   }
+  },
+  "FODAPICloudWatchRoleCB281E35": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "apigateway.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/CloudWatchRole/Resource"
+   }
+  },
+  "FODAPIAccount77690346": {
+   "Type": "AWS::ApiGateway::Account",
+   "Properties": {
+    "CloudWatchRoleArn": {
+     "Fn::GetAtt": [
+      "FODAPICloudWatchRoleCB281E35",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "FODAPIEBB0FEC0"
+   ],
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Account"
+   }
+  },
+  "FODAPIDeployment6F353C5555d86775a13677643279e434046fe8dc": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "Feature on Demand API",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "DependsOn": [
+    "FODAPIfeaturesactivateOPTIONS01BB65B8",
+    "FODAPIfeaturesactivatePOST60DE72DE",
+    "FODAPIfeaturesactivate11D76236",
+    "FODAPIfeaturescatalogGET16BAFF1F",
+    "FODAPIfeaturescatalogOPTIONSEF71D08E",
+    "FODAPIfeaturescatalogA7AAF977",
+    "FODAPIfeaturesOPTIONSF4A46551",
+    "FODAPIfeaturespurchaseOPTIONS87CD1E68",
+    "FODAPIfeaturespurchasePOSTB036A6AE",
+    "FODAPIfeaturespurchase10B93E97",
+    "FODAPIfeatures15234D4A",
+    "FODAPIOPTIONS0EDA435C",
+    "FODAPItestactivationOPTIONSA8540131",
+    "FODAPItestactivationPOST004DDB60",
+    "FODAPItestactivation7A234DBC",
+    "FODAPIvehiclesvehicleIdfeaturesfeatureIdDELETECDEF86E0",
+    "FODAPIvehiclesvehicleIdfeaturesfeatureIdOPTIONS5A6AC08B",
+    "FODAPIvehiclesvehicleIdfeaturesfeatureId0C67B090",
+    "FODAPIvehiclesvehicleIdfeaturesGET30AC62F8",
+    "FODAPIvehiclesvehicleIdfeaturesOPTIONS8253CE82",
+    "FODAPIvehiclesvehicleIdfeatures4F8AA0BD",
+    "FODAPIvehiclesvehicleIdOPTIONS48A40C71",
+    "FODAPIvehiclesvehicleId1E6BD674",
+    "FODAPIvehiclesOPTIONSDC6927F7",
+    "FODAPIvehiclesB84E19DE"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "FODAPIDeploymentStagev1EF4CB412": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "FODAPIDeployment6F353C5555d86775a13677643279e434046fe8dc"
+    },
+    "MethodSettings": [
+     {
+      "DataTraceEnabled": true,
+      "HttpMethod": "*",
+      "LoggingLevel": "INFO",
+      "MetricsEnabled": true,
+      "ResourcePath": "/*",
+      "ThrottlingBurstLimit": 100,
+      "ThrottlingRateLimit": 50
+     }
+    ],
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    },
+    "StageName": "v1",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Project",
+      "Value": "Snapdragon-FOD"
+     }
+    ]
+   },
+   "DependsOn": [
+    "FODAPIAccount77690346"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/DeploymentStage.v1/Resource"
+   }
+  },
+  "FODAPIOPTIONS0EDA435C": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "FODAPIEBB0FEC0",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/OPTIONS/Resource"
+   }
+  },
+  "FODAPIfeatures15234D4A": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "FODAPIEBB0FEC0",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "features",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/Resource"
+   }
+  },
+  "FODAPIfeaturesOPTIONSF4A46551": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPIfeatures15234D4A"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/OPTIONS/Resource"
+   }
+  },
+  "FODAPIfeaturespurchase10B93E97": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "FODAPIfeatures15234D4A"
+    },
+    "PathPart": "purchase",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/purchase/Resource"
+   }
+  },
+  "FODAPIfeaturespurchaseOPTIONS87CD1E68": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPIfeaturespurchase10B93E97"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/purchase/OPTIONS/Resource"
+   }
+  },
+  "FODAPIfeaturespurchasePOSTApiPermissionFODAPIdevFODAPIF7C43A5CPOSTfeaturespurchase64ABAD79": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttPurchaseHandlerAC512787Arn413F54FA"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/",
+       {
+        "Ref": "FODAPIDeploymentStagev1EF4CB412"
+       },
+       "/POST/features/purchase"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/purchase/POST/ApiPermission.FODAPIdevFODAPIF7C43A5C.POST..features.purchase"
+   }
+  },
+  "FODAPIfeaturespurchasePOSTApiPermissionTestFODAPIdevFODAPIF7C43A5CPOSTfeaturespurchaseA12ACCDC": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttPurchaseHandlerAC512787Arn413F54FA"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/test-invoke-stage/POST/features/purchase"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/purchase/POST/ApiPermission.Test.FODAPIdevFODAPIF7C43A5C.POST..features.purchase"
+   }
+  },
+  "FODAPIfeaturespurchasePOSTB036A6AE": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttPurchaseHandlerAC512787Arn413F54FA"
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "FODAPIfeaturespurchase10B93E97"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/purchase/POST/Resource"
+   }
+  },
+  "FODAPIfeaturesactivate11D76236": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "FODAPIfeatures15234D4A"
+    },
+    "PathPart": "activate",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/activate/Resource"
+   }
+  },
+  "FODAPIfeaturesactivateOPTIONS01BB65B8": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPIfeaturesactivate11D76236"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/activate/OPTIONS/Resource"
+   }
+  },
+  "FODAPIfeaturesactivatePOSTApiPermissionFODAPIdevFODAPIF7C43A5CPOSTfeaturesactivate03BE72DA": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttActivationHandler551A47DCArnEC01A910"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/",
+       {
+        "Ref": "FODAPIDeploymentStagev1EF4CB412"
+       },
+       "/POST/features/activate"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/activate/POST/ApiPermission.FODAPIdevFODAPIF7C43A5C.POST..features.activate"
+   }
+  },
+  "FODAPIfeaturesactivatePOSTApiPermissionTestFODAPIdevFODAPIF7C43A5CPOSTfeaturesactivateFEB2EBD9": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttActivationHandler551A47DCArnEC01A910"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/test-invoke-stage/POST/features/activate"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/activate/POST/ApiPermission.Test.FODAPIdevFODAPIF7C43A5C.POST..features.activate"
+   }
+  },
+  "FODAPIfeaturesactivatePOST60DE72DE": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttActivationHandler551A47DCArnEC01A910"
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "FODAPIfeaturesactivate11D76236"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/activate/POST/Resource"
+   }
+  },
+  "FODAPIfeaturescatalogA7AAF977": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "FODAPIfeatures15234D4A"
+    },
+    "PathPart": "catalog",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/catalog/Resource"
+   }
+  },
+  "FODAPIfeaturescatalogOPTIONSEF71D08E": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPIfeaturescatalogA7AAF977"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/catalog/OPTIONS/Resource"
+   }
+  },
+  "FODAPIfeaturescatalogGETApiPermissionFODAPIdevFODAPIF7C43A5CGETfeaturescatalog5537915C": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttCatalogHandler84C59375ArnFBE8F0BD"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/",
+       {
+        "Ref": "FODAPIDeploymentStagev1EF4CB412"
+       },
+       "/GET/features/catalog"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/catalog/GET/ApiPermission.FODAPIdevFODAPIF7C43A5C.GET..features.catalog"
+   }
+  },
+  "FODAPIfeaturescatalogGETApiPermissionTestFODAPIdevFODAPIF7C43A5CGETfeaturescatalog8DC6ED3A": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttCatalogHandler84C59375ArnFBE8F0BD"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/test-invoke-stage/GET/features/catalog"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/catalog/GET/ApiPermission.Test.FODAPIdevFODAPIF7C43A5C.GET..features.catalog"
+   }
+  },
+  "FODAPIfeaturescatalogGET16BAFF1F": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttCatalogHandler84C59375ArnFBE8F0BD"
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "FODAPIfeaturescatalogA7AAF977"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/features/catalog/GET/Resource"
+   }
+  },
+  "FODAPIvehiclesB84E19DE": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "FODAPIEBB0FEC0",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "vehicles",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/Resource"
+   }
+  },
+  "FODAPIvehiclesOPTIONSDC6927F7": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPIvehiclesB84E19DE"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/OPTIONS/Resource"
+   }
+  },
+  "FODAPIvehiclesvehicleId1E6BD674": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "FODAPIvehiclesB84E19DE"
+    },
+    "PathPart": "{vehicleId}",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/Resource"
+   }
+  },
+  "FODAPIvehiclesvehicleIdOPTIONS48A40C71": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPIvehiclesvehicleId1E6BD674"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/OPTIONS/Resource"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeatures4F8AA0BD": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "FODAPIvehiclesvehicleId1E6BD674"
+    },
+    "PathPart": "features",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/Resource"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesOPTIONS8253CE82": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPIvehiclesvehicleIdfeatures4F8AA0BD"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/OPTIONS/Resource"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesGETApiPermissionFODAPIdevFODAPIF7C43A5CGETvehiclesvehicleIdfeatures4B3E53A9": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttGetVehicleFeaturesHandlerC1A18575ArnFFE697B4"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/",
+       {
+        "Ref": "FODAPIDeploymentStagev1EF4CB412"
+       },
+       "/GET/vehicles/*/features"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/GET/ApiPermission.FODAPIdevFODAPIF7C43A5C.GET..vehicles.{vehicleId}.features"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesGETApiPermissionTestFODAPIdevFODAPIF7C43A5CGETvehiclesvehicleIdfeaturesFF8936E5": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttGetVehicleFeaturesHandlerC1A18575ArnFFE697B4"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/test-invoke-stage/GET/vehicles/*/features"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/GET/ApiPermission.Test.FODAPIdevFODAPIF7C43A5C.GET..vehicles.{vehicleId}.features"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesGET30AC62F8": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttGetVehicleFeaturesHandlerC1A18575ArnFFE697B4"
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "FODAPIvehiclesvehicleIdfeatures4F8AA0BD"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/GET/Resource"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesfeatureId0C67B090": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "FODAPIvehiclesvehicleIdfeatures4F8AA0BD"
+    },
+    "PathPart": "{featureId}",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/{featureId}/Resource"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesfeatureIdOPTIONS5A6AC08B": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPIvehiclesvehicleIdfeaturesfeatureId0C67B090"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/{featureId}/OPTIONS/Resource"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesfeatureIdDELETEApiPermissionFODAPIdevFODAPIF7C43A5CDELETEvehiclesvehicleIdfeaturesfeatureId967BF809": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttDeactivationHandlerE24F71E4Arn6571CC14"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/",
+       {
+        "Ref": "FODAPIDeploymentStagev1EF4CB412"
+       },
+       "/DELETE/vehicles/*/features/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/{featureId}/DELETE/ApiPermission.FODAPIdevFODAPIF7C43A5C.DELETE..vehicles.{vehicleId}.features.{featureId}"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesfeatureIdDELETEApiPermissionTestFODAPIdevFODAPIF7C43A5CDELETEvehiclesvehicleIdfeaturesfeatureId17149233": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttDeactivationHandlerE24F71E4Arn6571CC14"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/test-invoke-stage/DELETE/vehicles/*/features/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/{featureId}/DELETE/ApiPermission.Test.FODAPIdevFODAPIF7C43A5C.DELETE..vehicles.{vehicleId}.features.{featureId}"
+   }
+  },
+  "FODAPIvehiclesvehicleIdfeaturesfeatureIdDELETECDEF86E0": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "DELETE",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttDeactivationHandlerE24F71E4Arn6571CC14"
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "FODAPIvehiclesvehicleIdfeaturesfeatureId0C67B090"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/vehicles/{vehicleId}/features/{featureId}/DELETE/Resource"
+   }
+  },
+  "FODAPItestactivation7A234DBC": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "FODAPIEBB0FEC0",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "test-activation",
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/test-activation/Resource"
+   }
+  },
+  "FODAPItestactivationOPTIONSA8540131": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "FODAPItestactivation7A234DBC"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/test-activation/OPTIONS/Resource"
+   }
+  },
+  "FODAPItestactivationPOSTApiPermissionFODAPIdevFODAPIF7C43A5CPOSTtestactivationFEE80C14": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttTestActivationHandler3884EC3FArn90118315"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/",
+       {
+        "Ref": "FODAPIDeploymentStagev1EF4CB412"
+       },
+       "/POST/test-activation"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/test-activation/POST/ApiPermission.FODAPIdevFODAPIF7C43A5C.POST..test-activation"
+   }
+  },
+  "FODAPItestactivationPOSTApiPermissionTestFODAPIdevFODAPIF7C43A5CPOSTtestactivationDE631901": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttTestActivationHandler3884EC3FArn90118315"
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:585473054650:",
+       {
+        "Ref": "FODAPIEBB0FEC0"
+       },
+       "/test-invoke-stage/POST/test-activation"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/test-activation/POST/ApiPermission.Test.FODAPIdevFODAPIF7C43A5C.POST..test-activation"
+   }
+  },
+  "FODAPItestactivationPOST004DDB60": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::ImportValue": "FOD-Compute-dev:ExportsOutputFnGetAttTestActivationHandler3884EC3FArn90118315"
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "FODAPItestactivation7A234DBC"
+    },
+    "RestApiId": {
+     "Ref": "FODAPIEBB0FEC0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/FOD-API/Default/test-activation/POST/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WNS47CQAxEz8K+Y0LPCfhsESg5wMh0DBj6E8XuiVCUu49CQIKVX71SyRbszwrKBfZSuOZeeD7BUCu6u8Fefgds+YJKPT5gqEh03bLZnuMHrp1LOarZUevTI1DUyX6kWvFCk5uhIkm5c7RBIbMnvaZmKl/0bl9PnjwaxgBDlfysk6fReAynBmF7jkfqAotwiuPX/JC1zTqamBqCmyz/rAVbQrm4CXPR5agcCKr5/gM+Sd1zCAEAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "FOD-API-dev/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "FODAPIEndpointC4635BA0": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "FODAPIEBB0FEC0"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "FODAPIDeploymentStagev1EF4CB412"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "ApiUrl": {
+   "Description": "API Gateway URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "FODAPIEBB0FEC0"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "FODAPIDeploymentStagev1EF4CB412"
+      },
+      "/"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "FOD-API-dev-ApiUrl"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
