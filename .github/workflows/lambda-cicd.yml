@@ -128,6 +128,24 @@ jobs:
           npm ci
           npm install -g aws-cdk
 
+      - name: CRITICAL FIX - Clean problematic directories before CDK
+        run: |
+          echo "=== CRITICAL CLEANUP: Removing problematic directories ==="
+          # Remove any existing cdk.out directories recursively
+          find . -name "cdk.out" -type d -exec rm -rf {} + 2>/dev/null || true
+          # Remove any nested infrastructure directories that could cause recursion
+          find . -path "./infrastructure" -prune -o -name "infrastructure" -type d -exec rm -rf {} + 2>/dev/null || true
+          # Clean up any node_modules in source directories
+          find ./src -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
+          # Remove any test files that might be included
+          find ./src -name "*.test.*" -type f -delete 2>/dev/null || true
+          find ./src -name "*.spec.*" -type f -delete 2>/dev/null || true
+          # Verify cleanup
+          echo "=== Verification: Checking for problematic paths ==="
+          find . -name "cdk.out" -type d 2>/dev/null || echo "✅ No cdk.out directories found"
+          find . -path "./infrastructure" -prune -o -name "infrastructure" -type d -print 2>/dev/null || echo "✅ No nested infrastructure directories found"
+          echo "=== Cleanup complete ==="
+
       - name: CDK Bootstrap (if needed)
         run: |
           cd infrastructure
@@ -202,12 +220,13 @@ jobs:
             cp -r dist/shared lambda-package/
           fi
           
-          # Copy package.json for dependencies
+          # Copy package files for dependencies (BOTH package.json AND package-lock.json)
           cp package.json lambda-package/
+          cp package-lock.json lambda-package/
           
           # Install production dependencies only
           cd lambda-package
-          npm ci --production
+          npm ci --omit=dev
           
           # Create deployment package
           zip -r ../lambda-deployment.zip .
@@ -275,4 +294,4 @@ jobs:
           echo "✅ Deployment completed successfully!"
           echo "Environment: ${{ github.event.inputs.environment }}"
           echo "Region: ${{ env.AWS_REGION }}"
-          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"git show 3362a84d:.github/workflows/lambda-cicd.yml
