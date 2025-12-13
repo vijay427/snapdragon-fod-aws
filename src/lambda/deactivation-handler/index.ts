@@ -5,7 +5,6 @@
 
 import { SQSEvent, SQSRecord } from 'aws-lambda';
 import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-plane';
-import { FeatureRepository } from '../../shared/repositories/FeatureRepository';
 import { SubscriptionRepository } from '../../shared/repositories/SubscriptionRepository';
 import { TelemetryRepository } from '../../shared/repositories/TelemetryRepository';
 import {
@@ -13,10 +12,7 @@ import {
   FeatureDeactivationMessage,
 } from '../../shared/models/Messages';
 import { signAndAddSignature, generateMessageId } from '../../shared/utils/signing';
-import {
-  SubscriptionNotFoundError,
-  FeatureDeactivationError,
-} from '../../shared/models/Errors';
+import { SubscriptionNotFoundError, FeatureDeactivationError } from '../../shared/models/Errors';
 
 // Initialize AWS IoT Data Plane client
 const iotClient = new IoTDataPlaneClient({
@@ -24,7 +20,6 @@ const iotClient = new IoTDataPlaneClient({
 });
 
 // Initialize repositories
-const featureRepo = new FeatureRepository();
 const subscriptionRepo = new SubscriptionRepository();
 const telemetryRepo = new TelemetryRepository();
 
@@ -36,6 +31,24 @@ interface DeactivationRequest {
   vehicleId: string;
   featureId: string;
   reason: 'EXPIRED' | 'REVOKED' | 'USER_REQUESTED' | 'DOWNGRADE';
+}
+
+/**
+ * Signed message interface
+ */
+interface SignedMessage {
+  messageId: string;
+  signature: string;
+}
+
+/**
+ * Get error message from unknown error
+ */
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
 }
 
 /**
@@ -55,11 +68,12 @@ async function publishDeactivationMessage(
     });
 
     await iotClient.send(command);
+    // eslint-disable-next-line no-console
     console.log(`Deactivation message published to topic: ${topic}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to publish to IoT Core:', error);
     throw new FeatureDeactivationError(
-      `Failed to publish deactivation message: ${error.message}`,
+      `Failed to publish deactivation message: ${getErrorMessage(error)}`,
       vehicleId,
       message.payload.featureId
     );
@@ -70,6 +84,7 @@ async function publishDeactivationMessage(
  * Process single deactivation request
  */
 async function processDeactivation(request: DeactivationRequest): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('Processing deactivation:', request);
 
   try {
@@ -93,12 +108,13 @@ async function processDeactivation(request: DeactivationRequest): Promise<void> 
       messageId: generateMessageId(),
     };
 
-    const signedMessage = await signAndAddSignature(messageWithId);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const signedMessage: SignedMessage = await signAndAddSignature(messageWithId);
 
     // 4. Publish to IoT Core
     await publishDeactivationMessage(
       request.vehicleId,
-      signedMessage as FeatureDeactivationMessage
+      signedMessage as unknown as FeatureDeactivationMessage
     );
 
     // 5. Update subscription status based on reason
@@ -115,14 +131,15 @@ async function processDeactivation(request: DeactivationRequest): Promise<void> 
       messageId: signedMessage.messageId,
     });
 
+    // eslint-disable-next-line no-console
     console.log('Deactivation processed successfully:', request.subscriptionId);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Deactivation failed:', error);
 
     // Log error telemetry
     try {
       await telemetryRepo.logError(request.vehicleId, request.featureId, error);
-    } catch (telemetryError) {
+    } catch (telemetryError: unknown) {
       console.error('Failed to log error telemetry:', telemetryError);
     }
 
@@ -134,14 +151,15 @@ async function processDeactivation(request: DeactivationRequest): Promise<void> 
  * Main Lambda handler (triggered by SQS)
  */
 export async function handler(event: SQSEvent): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('Deactivation handler triggered:', JSON.stringify(event));
 
   const results = await Promise.allSettled(
     event.Records.map(async (record: SQSRecord) => {
       try {
-        const request: DeactivationRequest = JSON.parse(record.body);
+        const request = JSON.parse(record.body) as DeactivationRequest;
         await processDeactivation(request);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to process deactivation record:', error);
         throw error; // Re-throw to mark message as failed in SQS
       }
@@ -152,6 +170,7 @@ export async function handler(event: SQSEvent): Promise<void> {
   const successful = results.filter((r) => r.status === 'fulfilled').length;
   const failed = results.filter((r) => r.status === 'rejected').length;
 
+  // eslint-disable-next-line no-console
   console.log(`Deactivation batch complete: ${successful} successful, ${failed} failed`);
 
   // If any failed, throw error to trigger SQS retry

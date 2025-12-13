@@ -38,9 +38,19 @@ interface PurchaseRequest {
 }
 
 /**
+ * Request body interface
+ */
+interface RequestBody {
+  vehicleId?: unknown;
+  featureId?: unknown;
+  paymentMethod?: unknown;
+  paymentToken?: unknown;
+}
+
+/**
  * Validate purchase request
  */
-function validatePurchaseRequest(body: any): PurchaseRequest {
+function validatePurchaseRequest(body: RequestBody): PurchaseRequest {
   if (!body.vehicleId || typeof body.vehicleId !== 'string') {
     throw new ValidationError('vehicleId', 'Vehicle ID is required');
   }
@@ -57,19 +67,16 @@ function validatePurchaseRequest(body: any): PurchaseRequest {
     vehicleId: body.vehicleId.trim(),
     featureId: body.featureId.trim(),
     paymentMethod: body.paymentMethod.trim(),
-    paymentToken: body.paymentToken,
+    paymentToken: typeof body.paymentToken === 'string' ? body.paymentToken : undefined,
   };
 }
 
 /**
  * Process payment (mock implementation)
  */
-async function processPayment(
-  amount: number,
-  paymentMethod: string,
-  paymentToken?: string
-): Promise<boolean> {
+function processPayment(amount: number, paymentMethod: string, paymentToken?: string): boolean {
   // In production, integrate with payment gateway (Stripe, PayPal, etc.)
+  // eslint-disable-next-line no-console
   console.log('Processing payment:', { amount, paymentMethod, paymentToken });
 
   // Mock payment processing
@@ -90,6 +97,7 @@ async function processPayment(
  * Main Lambda handler
  */
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  // eslint-disable-next-line no-console
   console.log('Purchase request received:', JSON.stringify(event));
 
   try {
@@ -98,9 +106,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       throw new ValidationError('body', 'Request body is required');
     }
 
-    const body = JSON.parse(event.body);
+    const body = JSON.parse(event.body) as RequestBody;
     const request = validatePurchaseRequest(body);
 
+    // eslint-disable-next-line no-console
     console.log('Processing purchase:', request);
 
     // 1. Validate feature exists and is available
@@ -136,13 +145,15 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     });
 
     await transactionRepo.create(transaction);
+    // eslint-disable-next-line no-console
     console.log('Transaction created:', transactionId);
 
     // 4. Process payment
     try {
-      await processPayment(feature.price, request.paymentMethod, request.paymentToken);
+      processPayment(feature.price, request.paymentMethod, request.paymentToken);
+      // eslint-disable-next-line no-console
       console.log('Payment processed successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       // Mark transaction as failed
       await transactionRepo.markFailed(transactionId);
       throw error;
@@ -151,9 +162,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // 5. Create subscription
     const subscriptionId = `sub_${uuidv4()}`;
     const expiresAt =
-      feature.duration > 0
-        ? new Date(Date.now() + feature.duration * 60 * 60 * 1000)
-        : undefined;
+      feature.duration > 0 ? new Date(Date.now() + feature.duration * 60 * 60 * 1000) : undefined;
 
     const subscription = createSubscription({
       subscriptionId,
@@ -166,6 +175,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     });
 
     await subscriptionRepo.create(subscription);
+    // eslint-disable-next-line no-console
     console.log('Subscription created:', subscriptionId);
 
     // 6. Update transaction with subscription ID and mark completed
@@ -206,7 +216,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         timestamp: new Date().toISOString(),
       }),
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Purchase failed:', error);
 
     // Convert to FOD error if needed
@@ -214,11 +224,11 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     // Log error telemetry if we have vehicle context
     try {
-      const body = event.body ? JSON.parse(event.body) : {};
-      if (body.vehicleId && body.featureId) {
+      const body = event.body ? (JSON.parse(event.body) as RequestBody) : {};
+      if (typeof body.vehicleId === 'string' && typeof body.featureId === 'string') {
         await telemetryRepo.logError(body.vehicleId, body.featureId, fodError);
       }
-    } catch (telemetryError) {
+    } catch (telemetryError: unknown) {
       console.error('Failed to log error telemetry:', telemetryError);
     }
 

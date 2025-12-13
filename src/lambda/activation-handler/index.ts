@@ -8,6 +8,7 @@ import { IoTDataPlaneClient, PublishCommand } from '@aws-sdk/client-iot-data-pla
 import { FeatureRepository } from '../../shared/repositories/FeatureRepository';
 import { SubscriptionRepository } from '../../shared/repositories/SubscriptionRepository';
 import { TelemetryRepository } from '../../shared/repositories/TelemetryRepository';
+import { Feature } from '../../shared/models/Feature';
 import {
   createFeatureActivationMessage,
   FeatureActivationMessage,
@@ -18,7 +19,6 @@ import {
   SubscriptionNotFoundError,
   FeatureNotFoundError,
   FeatureActivationError,
-  isFODError,
 } from '../../shared/models/Errors';
 
 // Initialize AWS IoT Data Plane client
@@ -41,43 +41,100 @@ interface ActivationRequest {
 }
 
 /**
+ * Signed message interface
+ */
+interface SignedMessage {
+  messageId: string;
+  signature: string;
+  timestamp: string;
+  vehicleId: string;
+  messageType: string;
+  payload: unknown;
+}
+
+/**
+ * Activation configuration interface matching FeatureActivationMessage
+ */
+type ActivationConfig = FeatureActivationMessage['payload']['activationConfig'];
+
+/**
+ * Valid tier values
+ */
+const VALID_TIERS = ['4G', '5G'] as const;
+type TierType = (typeof VALID_TIERS)[number];
+
+/**
+ * Valid mode values
+ */
+const VALID_MODES = ['SPORT', 'ECO', 'COMFORT'] as const;
+type ModeType = (typeof VALID_MODES)[number];
+
+/**
+ * Type guard for tier values
+ */
+function isValidTier(value: unknown): value is TierType {
+  return typeof value === 'string' && VALID_TIERS.includes(value as TierType);
+}
+
+/**
+ * Type guard for mode values
+ */
+function isValidMode(value: unknown): value is ModeType {
+  return typeof value === 'string' && VALID_MODES.includes(value as ModeType);
+}
+
+/**
+ * Get error message from unknown error
+ */
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
+
+/**
  * Build activation configuration based on feature metadata
  */
-function buildActivationConfig(feature: any): any {
-  const config: any = {};
+function buildActivationConfig(feature: Feature): ActivationConfig {
+  const config: ActivationConfig = {};
+  const metadata = feature.metadata;
 
-  if (feature.metadata) {
+  if (metadata) {
     // Connectivity tier configuration
-    if (feature.metadata.tier) {
-      config.tier = feature.metadata.tier;
+    if (isValidTier(metadata['tier'])) {
+      config.tier = metadata['tier'];
     }
 
     // Performance mode configuration
-    if (feature.metadata.mode) {
-      config.mode = feature.metadata.mode;
+    if (isValidMode(metadata['mode'])) {
+      config.mode = metadata['mode'];
     }
 
     // Additional parameters
-    if (feature.metadata.throttleResponse) {
-      config.parameters = config.parameters || {};
-      config.parameters.throttleResponse = feature.metadata.throttleResponse;
+    const knownKeys = ['tier', 'mode', 'throttleResponse', 'suspensionStiffness', 'steeringWeight'];
+
+    if (typeof metadata['throttleResponse'] === 'string') {
+      config.parameters = config.parameters ?? {};
+      config.parameters['throttleResponse'] = metadata['throttleResponse'];
     }
 
-    if (feature.metadata.suspensionStiffness) {
-      config.parameters = config.parameters || {};
-      config.parameters.suspensionStiffness = feature.metadata.suspensionStiffness;
+    if (typeof metadata['suspensionStiffness'] === 'string') {
+      config.parameters = config.parameters ?? {};
+      config.parameters['suspensionStiffness'] = metadata['suspensionStiffness'];
     }
 
-    if (feature.metadata.steeringWeight) {
-      config.parameters = config.parameters || {};
-      config.parameters.steeringWeight = feature.metadata.steeringWeight;
+    if (typeof metadata['steeringWeight'] === 'string') {
+      config.parameters = config.parameters ?? {};
+      config.parameters['steeringWeight'] = metadata['steeringWeight'];
     }
 
     // Copy any other metadata parameters
-    Object.keys(feature.metadata).forEach((key) => {
-      if (!['tier', 'mode', 'throttleResponse', 'suspensionStiffness', 'steeringWeight'].includes(key)) {
-        config.parameters = config.parameters || {};
-        config.parameters[key] = feature.metadata[key];
+    Object.keys(metadata).forEach((key) => {
+      if (!knownKeys.includes(key)) {
+        config.parameters = config.parameters ?? {};
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        config.parameters[key] = metadata[key];
       }
     });
   }
@@ -102,11 +159,12 @@ async function publishActivationMessage(
     });
 
     await iotClient.send(command);
+    // eslint-disable-next-line no-console
     console.log(`Activation message published to topic: ${topic}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to publish to IoT Core:', error);
     throw new FeatureActivationError(
-      `Failed to publish activation message: ${error.message}`,
+      `Failed to publish activation message: ${getErrorMessage(error)}`,
       vehicleId,
       message.payload.featureId
     );
@@ -117,6 +175,7 @@ async function publishActivationMessage(
  * Process single activation request
  */
 async function processActivation(request: ActivationRequest): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('Processing activation:', request);
 
   try {
@@ -149,10 +208,14 @@ async function processActivation(request: ActivationRequest): Promise<void> {
       messageId: generateMessageId(),
     };
 
-    const signedMessage = await signAndAddSignature(messageWithId);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const signedMessage: SignedMessage = await signAndAddSignature(messageWithId);
 
     // 5. Publish to IoT Core
-    await publishActivationMessage(request.vehicleId, signedMessage as FeatureActivationMessage);
+    await publishActivationMessage(
+      request.vehicleId,
+      signedMessage as unknown as FeatureActivationMessage
+    );
 
     // 6. Log telemetry
     await telemetryRepo.logActivation(request.vehicleId, request.featureId, {
@@ -160,21 +223,22 @@ async function processActivation(request: ActivationRequest): Promise<void> {
       messageId: signedMessage.messageId,
     });
 
+    // eslint-disable-next-line no-console
     console.log('Activation processed successfully:', request.subscriptionId);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Activation failed:', error);
 
     // Mark subscription as failed
     try {
       await subscriptionRepo.markFailed(request.subscriptionId);
-    } catch (updateError) {
+    } catch (updateError: unknown) {
       console.error('Failed to update subscription status:', updateError);
     }
 
     // Log error telemetry
     try {
       await telemetryRepo.logError(request.vehicleId, request.featureId, error);
-    } catch (telemetryError) {
+    } catch (telemetryError: unknown) {
       console.error('Failed to log error telemetry:', telemetryError);
     }
 
@@ -186,14 +250,15 @@ async function processActivation(request: ActivationRequest): Promise<void> {
  * Main Lambda handler (triggered by SQS)
  */
 export async function handler(event: SQSEvent): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('Activation handler triggered:', JSON.stringify(event));
 
   const results = await Promise.allSettled(
     event.Records.map(async (record: SQSRecord) => {
       try {
-        const request: ActivationRequest = JSON.parse(record.body);
+        const request = JSON.parse(record.body) as ActivationRequest;
         await processActivation(request);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to process activation record:', error);
         throw error; // Re-throw to mark message as failed in SQS
       }
@@ -204,6 +269,7 @@ export async function handler(event: SQSEvent): Promise<void> {
   const successful = results.filter((r) => r.status === 'fulfilled').length;
   const failed = results.filter((r) => r.status === 'rejected').length;
 
+  // eslint-disable-next-line no-console
   console.log(`Activation batch complete: ${successful} successful, ${failed} failed`);
 
   // If any failed, throw error to trigger SQS retry

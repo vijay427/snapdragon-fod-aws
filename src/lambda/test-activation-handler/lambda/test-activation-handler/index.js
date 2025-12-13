@@ -3,7 +3,6 @@
  * Test Activation Handler Lambda Function
  * Orchestrates complete activation flow: purchase → subscription → HTTP Bridge → simulator
  * For testing without IoT Core infrastructure
- * Hook test: Modified to test CI/CD trigger - Ready for testing
  */
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };

@@ -6,17 +6,23 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 /**
+ * Get error message from unknown error
+ */
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
+
+/**
  * Main Lambda handler
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  console.log('Catalog request received:', JSON.stringify(event));
+export function handler(_event: APIGatewayProxyEvent): APIGatewayProxyResult {
+  // eslint-disable-next-line no-console
+  console.log('Catalog request received');
 
   try {
-    // TODO: Replace mock data with real MongoDB query to fetch features from database
-    // TODO: Add caching layer using Redis or ElastiCache for better performance
-    // TODO: Implement pagination for large feature catalogs
-    // TODO: Implement pagination for small feature catalogs
-    
     // Mock data for testing (until MongoDB is configured)
     const mockFeatures = [
       {
@@ -66,6 +72,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       },
     ];
 
+    // eslint-disable-next-line no-console
     console.log(`Returning ${mockFeatures.length} mock features`);
 
     return {
@@ -85,7 +92,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         timestamp: new Date().toISOString(),
       }),
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Catalog fetching failed:', error);
 
     return {
@@ -100,7 +107,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error.message || 'Internal server error occured',
+          message: getErrorMessage(error) || 'Internal server error occurred',
         },
         timestamp: new Date().toISOString(),
       }),

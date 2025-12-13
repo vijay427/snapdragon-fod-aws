@@ -3,15 +3,14 @@
  * Returns all active features for a specific vehicle
  */
 
-import { toFODError } from '@shared/models';
-import { isFODError } from '@shared/models';
-import { ValidationError } from '@shared/models';
+import { isFODError, toFODError, ValidationError } from '../../shared/models/Errors';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 /**
  * Main Lambda handler
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export function handler(event: APIGatewayProxyEvent): APIGatewayProxyResult {
+  // eslint-disable-next-line no-console
   console.log('Get vehicle features request received:', JSON.stringify(event));
 
   try {
@@ -22,6 +21,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       throw new ValidationError('vehicleId', 'Vehicle ID is required in path');
     }
 
+    // eslint-disable-next-line no-console
     console.log('Fetching features for vehicle:', vehicleId);
 
     // Mock data for testing (until MongoDB is configured)
@@ -52,6 +52,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       },
     ];
 
+    // eslint-disable-next-line no-console
     console.log(`Returning ${mockFeatures.length} mock features for vehicle ${vehicleId}`);
 
     return {
@@ -72,7 +73,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         timestamp: new Date().toISOString(),
       }),
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get vehicle features failed:', error);
 
     const fodError = isFODError(error) ? error : toFODError(error);

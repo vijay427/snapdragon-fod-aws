@@ -5,14 +5,13 @@
  */
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { TransactionRepository } from '../../shared/repositories/TransactionRepository';
 import { SubscriptionRepository } from '../../shared/repositories/SubscriptionRepository';
 import { Transaction, Subscription } from '../../shared/models';
 
 // Environment variables
-const MONGODB_URI = process.env.MONGODB_URI || '';
 const HTTP_BRIDGE_URL = process.env.HTTP_BRIDGE_URL || '';
 const HTTP_BRIDGE_API_KEY = process.env.HTTP_BRIDGE_API_KEY;
 const HTTP_BRIDGE_TIMEOUT = parseInt(process.env.HTTP_BRIDGE_TIMEOUT || '30000', 10);
@@ -20,6 +19,33 @@ const HTTP_BRIDGE_TIMEOUT = parseInt(process.env.HTTP_BRIDGE_TIMEOUT || '30000',
 // Initialize repositories
 const transactionRepo = new TransactionRepository();
 const subscriptionRepo = new SubscriptionRepository();
+
+/**
+ * Request body interface
+ */
+interface RequestBody {
+  vehicleId?: string;
+  featureId?: string;
+  userId?: string;
+  duration?: number;
+  isPermanent?: boolean;
+}
+
+/**
+ * Activation response data interface
+ */
+interface ActivationResponseData {
+  data?: {
+    activatedAt?: string;
+  };
+}
+
+/**
+ * State response data interface
+ */
+interface StateResponseData {
+  data?: unknown;
+}
 
 // Correlation ID for request tracing
 function generateCorrelationId(): string {
@@ -39,28 +65,29 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const startTime = Date.now();
   const timing: Record<string, number> = {};
 
+  // eslint-disable-next-line no-console
   console.log('Test activation request received', { correlationId, event: JSON.stringify(event) });
 
   try {
     // Parse and validate request
     const validationStart = Date.now();
-    
+
     if (!event.body) {
       return {
         statusCode: 400,
         headers: CORS_HEADERS,
         body: JSON.stringify({
           success: false,
-          error: { 
-            code: 'INVALID_REQUEST', 
+          error: {
+            code: 'INVALID_REQUEST',
             message: 'Request body required',
-            correlationId
+            correlationId,
           },
         }),
       };
     }
 
-    const body = JSON.parse(event.body);
+    const body = JSON.parse(event.body) as RequestBody;
     const { vehicleId, featureId, userId, duration, isPermanent } = body;
 
     // Input validation
@@ -70,10 +97,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         headers: CORS_HEADERS,
         body: JSON.stringify({
           success: false,
-          error: { 
-            code: 'VALIDATION_ERROR', 
+          error: {
+            code: 'VALIDATION_ERROR',
             message: 'vehicleId, featureId, and userId are required',
-            correlationId
+            correlationId,
           },
         }),
       };
@@ -85,10 +112,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         headers: CORS_HEADERS,
         body: JSON.stringify({
           success: false,
-          error: { 
-            code: 'VALIDATION_ERROR', 
+          error: {
+            code: 'VALIDATION_ERROR',
             message: 'duration must be a positive number',
-            correlationId
+            correlationId,
           },
         }),
       };
@@ -106,10 +133,11 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       amount: 99.99, // Mock amount
       status: 'COMPLETED',
       paymentMethod: 'TEST',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     await transactionRepo.create(transaction);
+    // eslint-disable-next-line no-console
     console.log('Transaction created', { correlationId, transactionId });
     timing.transaction = Date.now() - transactionStart;
 
@@ -118,7 +146,11 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const subscriptionId = uuidv4();
     const purchasedAt = new Date();
     const activatedAt = new Date();
-    const expiresAt = isPermanent ? undefined : (duration ? new Date(activatedAt.getTime() + duration * 60 * 60 * 1000) : undefined);
+    const expiresAt = isPermanent
+      ? undefined
+      : duration
+        ? new Date(activatedAt.getTime() + duration * 60 * 60 * 1000)
+        : undefined;
 
     const subscription: Subscription = {
       subscriptionId,
@@ -128,62 +160,65 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       purchasedAt,
       activatedAt,
       expiresAt,
-      isPermanent: isPermanent || false
+      isPermanent: isPermanent ?? false,
     };
 
     await subscriptionRepo.create(subscription);
+    // eslint-disable-next-line no-console
     console.log('Subscription created', { correlationId, subscriptionId });
     timing.subscription = Date.now() - subscriptionStart;
 
     // Step 3: Call HTTP Bridge to activate feature on simulator
     const activationStart = Date.now();
-    
+
     if (!HTTP_BRIDGE_URL) {
       throw new Error('HTTP_BRIDGE_URL environment variable not configured');
     }
 
     const bridgeHeaders: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
 
     if (HTTP_BRIDGE_API_KEY) {
       bridgeHeaders['Authorization'] = `Bearer ${HTTP_BRIDGE_API_KEY}`;
     }
 
-    const activationResponse = await axios.post(
+    const activationResponse = await axios.post<ActivationResponseData>(
       `${HTTP_BRIDGE_URL}/api/vehicle/${vehicleId}/activate`,
       {
         featureId,
-        duration
+        duration,
       },
       {
         headers: bridgeHeaders,
-        timeout: HTTP_BRIDGE_TIMEOUT
+        timeout: HTTP_BRIDGE_TIMEOUT,
       }
     );
 
-    console.log('Feature activated on simulator', { 
-      correlationId, 
-      vehicleId, 
+    // eslint-disable-next-line no-console
+    console.log('Feature activated on simulator', {
+      correlationId,
+      vehicleId,
       featureId,
-      response: activationResponse.data
+      response: activationResponse.data,
     });
     timing.activation = Date.now() - activationStart;
 
     // Step 4: Verify vehicle state
     const verificationStart = Date.now();
-    const stateResponse = await axios.get(
+    const stateResponse = await axios.get<StateResponseData>(
       `${HTTP_BRIDGE_URL}/api/vehicle/${vehicleId}/state`,
       {
         headers: bridgeHeaders,
-        timeout: HTTP_BRIDGE_TIMEOUT
+        timeout: HTTP_BRIDGE_TIMEOUT,
       }
     );
 
-    console.log('Vehicle state retrieved', { 
-      correlationId, 
+    // eslint-disable-next-line no-console
+    console.log('Vehicle state retrieved', {
+      correlationId,
       vehicleId,
-      state: stateResponse.data
+      state: stateResponse.data,
     });
     timing.verification = Date.now() - verificationStart;
 
@@ -199,50 +234,56 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           transaction: {
             transactionId: transaction.transactionId,
             amount: transaction.amount,
-            timestamp: transaction.timestamp.toISOString()
+            timestamp: transaction.timestamp.toISOString(),
           },
           subscription: {
             subscriptionId: subscription.subscriptionId,
             featureId: subscription.featureId,
             activatedAt: subscription.activatedAt?.toISOString(),
             expiresAt: subscription.expiresAt?.toISOString(),
-            isPermanent: subscription.isPermanent
+            isPermanent: subscription.isPermanent,
           },
           activation: {
             vehicleId,
             featureId,
             status: 'ACTIVATED',
-            activatedAt: activationResponse.data.data.activatedAt
+            activatedAt: activationResponse.data?.data?.activatedAt,
           },
-          vehicleState: stateResponse.data.data,
+          vehicleState: stateResponse.data?.data,
           timing: {
             totalMs: totalTime,
-            steps: timing
-          }
+            steps: timing,
+          },
         },
         correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
     };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
 
-  } catch (error: any) {
-    console.error('Test activation failed', { 
-      correlationId, 
-      error: error.message,
-      stack: error.stack
+    console.error('Test activation failed', {
+      correlationId,
+      error: errorMessage,
+      stack: errorStack,
     });
 
     // Determine error type and status code
     let statusCode = 500;
     let errorCode = 'INTERNAL_ERROR';
+    let errorDetails: unknown = undefined;
 
-    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-      statusCode = 503;
-      errorCode = 'BRIDGE_UNAVAILABLE';
-    } else if (error.response?.status === 503) {
-      statusCode = 503;
-      errorCode = 'MCP_UNAVAILABLE';
-    } else if (error.name === 'ValidationError') {
+    if (error instanceof AxiosError) {
+      if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+        statusCode = 503;
+        errorCode = 'BRIDGE_UNAVAILABLE';
+      } else if (error.response?.status === 503) {
+        statusCode = 503;
+        errorCode = 'MCP_UNAVAILABLE';
+      }
+      errorDetails = error.response?.data;
+    } else if (error instanceof Error && error.name === 'ValidationError') {
       statusCode = 400;
       errorCode = 'VALIDATION_ERROR';
     }
@@ -254,13 +295,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         success: false,
         error: {
           code: errorCode,
-          message: error.message,
-          details: error.response?.data,
-          correlationId
+          message: errorMessage,
+          details: errorDetails,
+          correlationId,
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
     };
   }
 }
-

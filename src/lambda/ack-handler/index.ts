@@ -3,7 +3,6 @@
  * Handles acknowledgment messages from vehicles via IoT Core
  */
 
-import { IoTEvent } from 'aws-lambda';
 import { SubscriptionRepository } from '../../shared/repositories/SubscriptionRepository';
 import { TelemetryRepository } from '../../shared/repositories/TelemetryRepository';
 import {
@@ -12,20 +11,29 @@ import {
   validateBaseMessage,
 } from '../../shared/models/Messages';
 import { verifyMessage } from '../../shared/utils/signing';
-import {
-  SubscriptionNotFoundError,
-  MessageSignatureError,
-  InvalidMessageError,
-} from '../../shared/models/Errors';
+import { MessageSignatureError, InvalidMessageError } from '../../shared/models/Errors';
 
 // Initialize repositories
 const subscriptionRepo = new SubscriptionRepository();
 const telemetryRepo = new TelemetryRepository();
 
 /**
+ * IoT Core event message interface
+ */
+interface IoTMessage {
+  messageType: string;
+  messageId: string;
+  vehicleId: string;
+  timestamp: string;
+  signature: string;
+  payload: Record<string, unknown>;
+}
+
+/**
  * Process activation acknowledgment
  */
 async function processActivationAck(message: FeatureActivationAckMessage): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('Processing activation ACK:', message);
 
   const { vehicleId, payload } = message;
@@ -43,6 +51,7 @@ async function processActivationAck(message: FeatureActivationAckMessage): Promi
     // Update subscription based on ACK status
     if (status === 'SUCCESS') {
       await subscriptionRepo.activate(subscription.subscriptionId);
+      // eslint-disable-next-line no-console
       console.log(`Subscription activated: ${subscription.subscriptionId}`);
 
       // Log success telemetry
@@ -53,7 +62,9 @@ async function processActivationAck(message: FeatureActivationAckMessage): Promi
       });
     } else if (status === 'FAILED') {
       await subscriptionRepo.markFailed(subscription.subscriptionId);
-      console.error(`Activation failed: ${errorCode} - ${errorMessage}`);
+      console.error(
+        `Activation failed: ${errorCode ?? 'UNKNOWN'} - ${errorMessage ?? 'No message'}`
+      );
 
       // Log failure telemetry
       await telemetryRepo.logError(vehicleId, featureId, {
@@ -65,7 +76,7 @@ async function processActivationAck(message: FeatureActivationAckMessage): Promi
     } else if (status === 'PARTIAL') {
       // Partial success - mark as active but log warning
       await subscriptionRepo.activate(subscription.subscriptionId);
-      console.warn(`Partial activation: ${errorMessage}`);
+      console.warn(`Partial activation: ${errorMessage ?? 'No details'}`);
 
       await telemetryRepo.logActivation(vehicleId, featureId, {
         subscriptionId: subscription.subscriptionId,
@@ -74,7 +85,7 @@ async function processActivationAck(message: FeatureActivationAckMessage): Promi
         messageId: message.messageId,
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to process activation ACK:', error);
     throw error;
   }
@@ -84,6 +95,7 @@ async function processActivationAck(message: FeatureActivationAckMessage): Promi
  * Process deactivation acknowledgment
  */
 async function processDeactivationAck(message: FeatureDeactivationAckMessage): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('Processing deactivation ACK:', message);
 
   const { vehicleId, payload } = message;
@@ -101,6 +113,7 @@ async function processDeactivationAck(message: FeatureDeactivationAckMessage): P
     // Update subscription based on ACK status
     if (status === 'SUCCESS') {
       await subscriptionRepo.deactivate(subscription.subscriptionId);
+      // eslint-disable-next-line no-console
       console.log(`Subscription deactivated: ${subscription.subscriptionId}`);
 
       // Log success telemetry
@@ -110,7 +123,9 @@ async function processDeactivationAck(message: FeatureDeactivationAckMessage): P
         messageId: message.messageId,
       });
     } else if (status === 'FAILED') {
-      console.error(`Deactivation failed: ${errorCode} - ${errorMessage}`);
+      console.error(
+        `Deactivation failed: ${errorCode ?? 'UNKNOWN'} - ${errorMessage ?? 'No message'}`
+      );
 
       // Log failure telemetry
       await telemetryRepo.logError(vehicleId, featureId, {
@@ -120,7 +135,7 @@ async function processDeactivationAck(message: FeatureDeactivationAckMessage): P
         messageId: message.messageId,
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to process deactivation ACK:', error);
     throw error;
   }
@@ -129,12 +144,14 @@ async function processDeactivationAck(message: FeatureDeactivationAckMessage): P
 /**
  * Main Lambda handler (triggered by IoT Core rule)
  */
-export async function handler(event: any): Promise<void> {
+export async function handler(event: unknown): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('ACK handler triggered:', JSON.stringify(event));
 
   try {
     // Parse message from IoT Core event
-    const message = typeof event === 'string' ? JSON.parse(event) : event;
+    const message: IoTMessage =
+      typeof event === 'string' ? (JSON.parse(event) as IoTMessage) : (event as IoTMessage);
 
     // Validate base message structure
     if (!validateBaseMessage(message)) {
@@ -150,19 +167,20 @@ export async function handler(event: any): Promise<void> {
     // Route based on message type
     switch (message.messageType) {
       case 'FEATURE_ACTIVATION_ACK':
-        await processActivationAck(message as FeatureActivationAckMessage);
+        await processActivationAck(message as unknown as FeatureActivationAckMessage);
         break;
 
       case 'FEATURE_DEACTIVATION_ACK':
-        await processDeactivationAck(message as FeatureDeactivationAckMessage);
+        await processDeactivationAck(message as unknown as FeatureDeactivationAckMessage);
         break;
 
       default:
         console.warn(`Unknown message type: ${message.messageType}`);
     }
 
+    // eslint-disable-next-line no-console
     console.log('ACK processed successfully');
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('ACK processing failed:', error);
     throw error;
   }
