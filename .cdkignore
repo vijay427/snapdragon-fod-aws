@@ -1,0 +1,16 @@
+# Prevent recursive asset inclusion
+infrastructure/cdk.out/
+infrastructure/node_modules/
+node_modules/
+dist/
+.git/
+.github/
+coverage/
+.nyc_output/
+*.log
+.env
+.DS_Store
+docs/
+tests/
+*.test.ts
+*.spec.ts

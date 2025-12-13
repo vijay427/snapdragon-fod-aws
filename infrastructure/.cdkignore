@@ -1,0 +1,23 @@
+# CDK asset exclusions
+node_modules
+*.swp
+*.tmp
+.git
+.gitignore
+README.md
+.env
+.nyc_output
+coverage
+.DS_Store
+*.log
+dist/
+cdk.out/
+.github/
+docs/
+tests/
+*.test.ts
+*.spec.ts
+jest.config.js
+tsconfig.json
+.eslintrc.json
+.prettierrc.json

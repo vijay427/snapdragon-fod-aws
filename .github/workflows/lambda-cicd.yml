@@ -238,7 +238,7 @@ jobs:
   post-deployment:
     name: Post-Deployment Verification
     runs-on: ubuntu-latest
-    needs: [deploy-lambdas]
+    needs: [deploy-lambdas, deploy-infrastructure]
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
