@@ -235,51 +235,10 @@ jobs:
             --query '{Name:FunctionName,Runtime:Runtime,LastModified:LastModified,State:State}' \
             --output table
 
-  deploy-infrastructure:
-    name: Deploy CDK Infrastructure
-    runs-on: ubuntu-latest
-    needs: [detect-changes, build-and-test]
-    if: needs.detect-changes.outputs.has_changes == 'true'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install dependencies
-        run: |
-          npm ci
-          cd infrastructure
-          npm ci
-          npm install -g aws-cdk
-
-      - name: CDK Synth
-        run: |
-          cd infrastructure
-          cdk synth --context environment=${{ github.event.inputs.environment }}
-
-      - name: CDK Deploy Compute Stack
-        run: |
-          cd infrastructure
-          cdk deploy FOD-Compute-${{ github.event.inputs.environment }} \
-            --require-approval never \
-            --context environment=${{ github.event.inputs.environment }}
-
   post-deployment:
     name: Post-Deployment Verification
     runs-on: ubuntu-latest
-    needs: [deploy-lambdas, deploy-infrastructure]
+    needs: [deploy-lambdas]
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
