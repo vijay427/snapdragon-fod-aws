@@ -1,23 +1,100 @@
-# CDK asset exclusions
+# CRITICAL CDK asset exclusions - Prevent recursive inclusion
+# CDK output directories (CRITICAL)
+cdk.out/
+**/cdk.out/
+cdk.out
+infrastructure/cdk.out/
+
+# Infrastructure directory (CRITICAL)
+infrastructure/
+**/infrastructure/
+infrastructure
+
+# Node modules and build artifacts
+node_modules/
+**/node_modules/
 node_modules
+dist/
+**/dist/
+dist
+
+# Version control
+.git/
+**/git/
+.git
+.github/
+**/.github/
+.github
+
+# Test files and coverage
+tests/
+**/tests/
+tests
+coverage/
+**/coverage/
+coverage
+.nyc_output/
+**/.nyc_output/
+.nyc_output
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+**/*.test.*
+**/*.spec.*
+
+# Documentation
+docs/
+**/docs/
+docs
+*.md
+**/*.md
+README.md
+
+# Configuration files
+jest.config.*
+tsconfig.json
+.eslintrc.*
+.prettierrc.*
+**/.eslintrc.*
+**/.prettierrc.*
+
+# Environment and system files
+.env*
+**/.env*
+.DS_Store
+**/.DS_Store
+*.log
+**/*.log
+.vscode/
+**/.vscode/
+.vscode
+
+# Project-specific
+mcp-servers/
+**/mcp-servers/
+mcp-servers
+scripts/
+**/scripts/
+scripts
+.kiro/
+**/.kiro/
+.kiro
+*.ps1
+*.bat
+*.exe
+*.html
+FOD-System-Postman-Collection.json
+DEPLOYMENT_STATUS.md
+QUALCOMM_*.md
+api-test-ui.html
+test-simulator.js
+push-to-github.ps1
+ngrok.exe
+.lambda-changes.json
+
+# Temporary files
 *.swp
 *.tmp
-.git
-.gitignore
-README.md
-.env
-.nyc_output
-coverage
-.DS_Store
-*.log
-dist/
-cdk.out/
-.github/
-docs/
-tests/
-*.test.ts
-*.spec.ts
-jest.config.js
-tsconfig.json
-.eslintrc.json
-.prettierrc.json
+**/*.swp
+**/*.tmp

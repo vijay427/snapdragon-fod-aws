@@ -22,33 +22,79 @@ export class ComputeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ComputeStackProps) {
     super(scope, id, props);
 
-    // Common exclusion patterns for Lambda assets
+    // Common exclusion patterns for Lambda assets - CRITICAL: Prevent recursive inclusion
     const commonExclusions = [
+      // CRITICAL: Prevent recursive CDK output inclusion
+      '**/cdk.out/**',
+      'cdk.out/**',
+      'cdk.out',
+      
+      // CRITICAL: Prevent infrastructure directory inclusion
+      '**/infrastructure/**',
+      'infrastructure/**',
+      'infrastructure',
+      
+      // Node modules and build artifacts
+      '**/node_modules/**',
       'node_modules/**',
+      'node_modules',
+      '**/dist/**',
+      'dist/**',
+      'dist',
+      
+      // Version control and CI/CD
+      '**/.git/**',
+      '.git/**',
+      '.git',
+      '**/.github/**',
+      '.github/**',
+      '.github',
+      
+      // Test files
+      '**/*.test.ts',
+      '**/*.test.js',
       '*.test.ts',
       '*.test.js',
+      '**/*.spec.ts',
+      '**/*.spec.js',
       '*.spec.ts',
       '*.spec.js',
-      'coverage/**',
-      '.nyc_output/**',
-      'dist/**',
-      'cdk.out/**',
-      '.git/**',
-      '.github/**',
-      'infrastructure/**',
-      'docs/**',
+      '**/tests/**',
       'tests/**',
+      'tests',
+      '**/coverage/**',
+      'coverage/**',
+      'coverage',
+      '**/.nyc_output/**',
+      '.nyc_output/**',
+      '.nyc_output',
+      
+      // Documentation and config files
+      '**/*.md',
       '*.md',
-      '.env*',
+      '**/docs/**',
+      'docs/**',
+      'docs',
       'jest.config.*',
       'tsconfig.json',
       '.eslintrc.*',
       '.prettierrc.*',
+      
+      // Environment and system files
+      '.env*',
       '.DS_Store',
       '*.log',
+      '**/.vscode/**',
       '.vscode/**',
+      '.vscode',
+      
+      // Project-specific exclusions
+      '**/mcp-servers/**',
       'mcp-servers/**',
+      'mcp-servers',
+      '**/scripts/**',
       'scripts/**',
+      'scripts',
       '*.ps1',
       '*.bat',
       '*.exe',
@@ -60,13 +106,38 @@ export class ComputeStack extends cdk.Stack {
       'test-simulator.js',
       'push-to-github.ps1',
       'ngrok.exe',
-      '.lambda-changes.json'
+      '.lambda-changes.json',
+      
+      // Kiro-specific exclusions
+      '**/.kiro/**',
+      '.kiro/**',
+      '.kiro'
     ];
 
     // Helper method to create Lambda asset with proper exclusions
     const createLambdaAsset = (functionName: string): lambda.Code => {
       return lambda.Code.fromAsset(path.join(__dirname, `../../src/lambda/${functionName}`), {
-        exclude: commonExclusions
+        exclude: commonExclusions,
+        ignoreMode: cdk.IgnoreMode.GLOB,
+        followSymlinks: cdk.SymlinkFollowMode.NEVER,
+        bundling: {
+          image: lambda.Runtime.NODEJS_18_X.bundlingImage,
+          command: [
+            'bash', '-c', [
+              'echo "Starting Lambda bundling for ' + functionName + '"',
+              'cp -r /asset-input/* /asset-output/ 2>/dev/null || true',
+              'cd /asset-output',
+              'find . -name "cdk.out" -type d -exec rm -rf {} + 2>/dev/null || true',
+              'find . -name "infrastructure" -type d -exec rm -rf {} + 2>/dev/null || true',
+              'find . -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true',
+              'find . -name ".git" -type d -exec rm -rf {} + 2>/dev/null || true',
+              'find . -name "*.test.*" -type f -delete 2>/dev/null || true',
+              'find . -name "*.spec.*" -type f -delete 2>/dev/null || true',
+              'echo "Bundling complete for ' + functionName + '"'
+            ].join(' && ')
+          ],
+          user: 'root'
+        }
       });
     };
 

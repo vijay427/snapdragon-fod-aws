@@ -1,16 +1,76 @@
-# Prevent recursive asset inclusion
+# CRITICAL: Prevent recursive asset inclusion at project root
+# CDK output directories (CRITICAL - prevents infinite recursion)
 infrastructure/cdk.out/
+**/infrastructure/cdk.out/
+cdk.out/
+**/cdk.out/
+
+# Infrastructure directories (CRITICAL)
+infrastructure/
+**/infrastructure/
+
+# Node modules (CRITICAL)
 infrastructure/node_modules/
+**/infrastructure/node_modules/
 node_modules/
+**/node_modules/
+
+# Build artifacts
 dist/
+**/dist/
+
+# Version control
 .git/
+**/.git/
 .github/
+**/.github/
+
+# Test and coverage
 coverage/
+**/coverage/
 .nyc_output/
-*.log
-.env
-.DS_Store
-docs/
+**/.nyc_output/
 tests/
+**/tests/
 *.test.ts
+*.test.js
 *.spec.ts
+*.spec.js
+**/*.test.*
+**/*.spec.*
+
+# Documentation
+docs/
+**/docs/
+*.md
+**/*.md
+
+# Environment and system files
+*.log
+**/*.log
+.env*
+**/.env*
+.DS_Store
+**/.DS_Store
+.vscode/
+**/.vscode/
+
+# Project-specific
+mcp-servers/
+**/mcp-servers/
+scripts/
+**/scripts/
+.kiro/
+**/.kiro/
+*.ps1
+*.bat
+*.exe
+*.html
+FOD-System-Postman-Collection.json
+DEPLOYMENT_STATUS.md
+QUALCOMM_*.md
+api-test-ui.html
+test-simulator.js
+push-to-github.ps1
+ngrok.exe
+.lambda-changes.json
