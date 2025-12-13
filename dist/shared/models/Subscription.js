@@ -16,7 +16,8 @@ function validateSubscription(subscription) {
         return false;
     }
     // Required fields
-    if (typeof subscription.subscriptionId !== 'string' || subscription.subscriptionId.trim() === '') {
+    if (typeof subscription.subscriptionId !== 'string' ||
+        subscription.subscriptionId.trim() === '') {
         return false;
     }
     if (typeof subscription.vehicleId !== 'string' || subscription.vehicleId.trim() === '') {
@@ -25,7 +26,13 @@ function validateSubscription(subscription) {
     if (typeof subscription.featureId !== 'string' || subscription.featureId.trim() === '') {
         return false;
     }
-    const validStatuses = ['PENDING', 'ACTIVE', 'EXPIRED', 'DEACTIVATED', 'FAILED'];
+    const validStatuses = [
+        'PENDING',
+        'ACTIVE',
+        'EXPIRED',
+        'DEACTIVATED',
+        'FAILED',
+    ];
     if (!validStatuses.includes(subscription.status)) {
         return false;
     }

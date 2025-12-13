@@ -17,6 +17,7 @@ const telemetryRepo = new TelemetryRepository_1.TelemetryRepository();
  * Process activation acknowledgment
  */
 async function processActivationAck(message) {
+    // eslint-disable-next-line no-console
     console.log('Processing activation ACK:', message);
     const { vehicleId, payload } = message;
     const { featureId, status, activatedAt, errorCode, errorMessage } = payload;
@@ -30,6 +31,7 @@ async function processActivationAck(message) {
         // Update subscription based on ACK status
         if (status === 'SUCCESS') {
             await subscriptionRepo.activate(subscription.subscriptionId);
+            // eslint-disable-next-line no-console
             console.log(`Subscription activated: ${subscription.subscriptionId}`);
             // Log success telemetry
             await telemetryRepo.logActivation(vehicleId, featureId, {
@@ -40,7 +42,7 @@ async function processActivationAck(message) {
         }
         else if (status === 'FAILED') {
             await subscriptionRepo.markFailed(subscription.subscriptionId);
-            console.error(`Activation failed: ${errorCode} - ${errorMessage}`);
+            console.error(`Activation failed: ${errorCode ?? 'UNKNOWN'} - ${errorMessage ?? 'No message'}`);
             // Log failure telemetry
             await telemetryRepo.logError(vehicleId, featureId, {
                 subscriptionId: subscription.subscriptionId,
@@ -52,7 +54,7 @@ async function processActivationAck(message) {
         else if (status === 'PARTIAL') {
             // Partial success - mark as active but log warning
             await subscriptionRepo.activate(subscription.subscriptionId);
-            console.warn(`Partial activation: ${errorMessage}`);
+            console.warn(`Partial activation: ${errorMessage ?? 'No details'}`);
             await telemetryRepo.logActivation(vehicleId, featureId, {
                 subscriptionId: subscription.subscriptionId,
                 status: 'PARTIAL',
@@ -70,6 +72,7 @@ async function processActivationAck(message) {
  * Process deactivation acknowledgment
  */
 async function processDeactivationAck(message) {
+    // eslint-disable-next-line no-console
     console.log('Processing deactivation ACK:', message);
     const { vehicleId, payload } = message;
     const { featureId, status, deactivatedAt, errorCode, errorMessage } = payload;
@@ -83,6 +86,7 @@ async function processDeactivationAck(message) {
         // Update subscription based on ACK status
         if (status === 'SUCCESS') {
             await subscriptionRepo.deactivate(subscription.subscriptionId);
+            // eslint-disable-next-line no-console
             console.log(`Subscription deactivated: ${subscription.subscriptionId}`);
             // Log success telemetry
             await telemetryRepo.logDeactivation(vehicleId, featureId, {
@@ -92,7 +96,7 @@ async function processDeactivationAck(message) {
             });
         }
         else if (status === 'FAILED') {
-            console.error(`Deactivation failed: ${errorCode} - ${errorMessage}`);
+            console.error(`Deactivation failed: ${errorCode ?? 'UNKNOWN'} - ${errorMessage ?? 'No message'}`);
             // Log failure telemetry
             await telemetryRepo.logError(vehicleId, featureId, {
                 subscriptionId: subscription.subscriptionId,
@@ -111,6 +115,7 @@ async function processDeactivationAck(message) {
  * Main Lambda handler (triggered by IoT Core rule)
  */
 async function handler(event) {
+    // eslint-disable-next-line no-console
     console.log('ACK handler triggered:', JSON.stringify(event));
     try {
         // Parse message from IoT Core event
@@ -135,6 +140,7 @@ async function handler(event) {
             default:
                 console.warn(`Unknown message type: ${message.messageType}`);
         }
+        // eslint-disable-next-line no-console
         console.log('ACK processed successfully');
     }
     catch (error) {

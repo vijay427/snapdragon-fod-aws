@@ -6,10 +6,20 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = handler;
 /**
+ * Get error message from unknown error
+ */
+function getErrorMessage(error) {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return String(error);
+}
+/**
  * Main Lambda handler
  */
-async function handler(event) {
-    console.log('Catalog request received:', JSON.stringify(event));
+function handler(_event) {
+    // eslint-disable-next-line no-console
+    console.log('Catalog request received');
     try {
         // Mock data for testing (until MongoDB is configured)
         const mockFeatures = [
@@ -59,6 +69,7 @@ async function handler(event) {
                 isActive: true,
             },
         ];
+        // eslint-disable-next-line no-console
         console.log(`Returning ${mockFeatures.length} mock features`);
         return {
             statusCode: 200,
@@ -79,7 +90,7 @@ async function handler(event) {
         };
     }
     catch (error) {
-        console.error('Catalog fetch failed:', error);
+        console.error('Catalog fetching failed:', error);
         return {
             statusCode: 500,
             headers: {
@@ -92,7 +103,7 @@ async function handler(event) {
                 success: false,
                 error: {
                     code: 'INTERNAL_ERROR',
-                    message: error.message || 'Internal server error',
+                    message: getErrorMessage(error) || 'Internal server error occurred',
                 },
                 timestamp: new Date().toISOString(),
             }),

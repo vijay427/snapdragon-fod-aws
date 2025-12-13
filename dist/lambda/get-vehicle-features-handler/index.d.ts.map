@@ -1,1 +1,1 @@
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/lambda/get-vehicle-features-handler/index.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAKH,OAAO,EAAE,oBAAoB,EAAE,qBAAqB,EAAE,MAAM,YAAY,CAAC;AAEzE;;GAEG;AACH,wBAAsB,OAAO,CAAC,KAAK,EAAE,oBAAoB,GAAG,OAAO,CAAC,qBAAqB,CAAC,CAqFzF"}
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/lambda/get-vehicle-features-handler/index.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAGH,OAAO,EAAE,oBAAoB,EAAE,qBAAqB,EAAE,MAAM,YAAY,CAAC;AAEzE;;GAEG;AACH,wBAAgB,OAAO,CAAC,KAAK,EAAE,oBAAoB,GAAG,qBAAqB,CAwF1E"}

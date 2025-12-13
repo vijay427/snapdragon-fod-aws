@@ -22,7 +22,7 @@ export class SubscriptionRepository {
     try {
       const collection = await this.getCollection();
       const result = await collection.findOne({ subscriptionId });
-      return result as Subscription | null;
+      return result as unknown as Subscription | null;
     } catch (error: any) {
       throw new DatabaseError('findById', error.message, { subscriptionId });
     }
@@ -51,7 +51,7 @@ export class SubscriptionRepository {
     try {
       const collection = await this.getCollection();
       const result = await collection.findOne({ vehicleId, featureId });
-      return result as Subscription | null;
+      return result as unknown as Subscription | null;
     } catch (error: any) {
       throw new DatabaseError('findByVehicleAndFeature', error.message, {
         vehicleId,

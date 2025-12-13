@@ -84,7 +84,7 @@ export function generateKeyPair(): KeyPair {
  */
 function createSigningPayload(message: any): string {
   // Create a copy without the signature field
-  const { signature, ...messageWithoutSignature } = message;
+  const { signature: _, ...messageWithoutSignature } = message;
 
   // Sort keys for consistent signing
   const sortedMessage = sortObjectKeys(messageWithoutSignature);
@@ -145,10 +145,7 @@ export async function signMessage(message: any, privateKey?: string): Promise<st
 /**
  * Verify message signature using ECDSA SHA-256
  */
-export async function verifyMessageSignature(
-  message: any,
-  publicKey?: string
-): Promise<boolean> {
+export async function verifyMessageSignature(message: any, publicKey?: string): Promise<boolean> {
   try {
     // Get public key if not provided
     if (!publicKey) {

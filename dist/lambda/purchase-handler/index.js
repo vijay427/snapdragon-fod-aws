@@ -35,14 +35,15 @@ function validatePurchaseRequest(body) {
         vehicleId: body.vehicleId.trim(),
         featureId: body.featureId.trim(),
         paymentMethod: body.paymentMethod.trim(),
-        paymentToken: body.paymentToken,
+        paymentToken: typeof body.paymentToken === 'string' ? body.paymentToken : undefined,
     };
 }
 /**
  * Process payment (mock implementation)
  */
-async function processPayment(amount, paymentMethod, paymentToken) {
+function processPayment(amount, paymentMethod, paymentToken) {
     // In production, integrate with payment gateway (Stripe, PayPal, etc.)
+    // eslint-disable-next-line no-console
     console.log('Processing payment:', { amount, paymentMethod, paymentToken });
     // Mock payment processing
     if (amount <= 0) {
@@ -59,6 +60,7 @@ async function processPayment(amount, paymentMethod, paymentToken) {
  * Main Lambda handler
  */
 async function handler(event) {
+    // eslint-disable-next-line no-console
     console.log('Purchase request received:', JSON.stringify(event));
     try {
         // Parse and validate request body
@@ -67,6 +69,7 @@ async function handler(event) {
         }
         const body = JSON.parse(event.body);
         const request = validatePurchaseRequest(body);
+        // eslint-disable-next-line no-console
         console.log('Processing purchase:', request);
         // 1. Validate feature exists and is available
         const feature = await featureRepo.findById(request.featureId);
@@ -93,10 +96,12 @@ async function handler(event) {
             timestamp: new Date(),
         });
         await transactionRepo.create(transaction);
+        // eslint-disable-next-line no-console
         console.log('Transaction created:', transactionId);
         // 4. Process payment
         try {
-            await processPayment(feature.price, request.paymentMethod, request.paymentToken);
+            processPayment(feature.price, request.paymentMethod, request.paymentToken);
+            // eslint-disable-next-line no-console
             console.log('Payment processed successfully');
         }
         catch (error) {
@@ -106,9 +111,7 @@ async function handler(event) {
         }
         // 5. Create subscription
         const subscriptionId = `sub_${(0, uuid_1.v4)()}`;
-        const expiresAt = feature.duration > 0
-            ? new Date(Date.now() + feature.duration * 60 * 60 * 1000)
-            : undefined;
+        const expiresAt = feature.duration > 0 ? new Date(Date.now() + feature.duration * 60 * 60 * 1000) : undefined;
         const subscription = (0, Subscription_1.createSubscription)({
             subscriptionId,
             vehicleId: request.vehicleId,
@@ -119,6 +122,7 @@ async function handler(event) {
             isPermanent: feature.duration === 0,
         });
         await subscriptionRepo.create(subscription);
+        // eslint-disable-next-line no-console
         console.log('Subscription created:', subscriptionId);
         // 6. Update transaction with subscription ID and mark completed
         await transactionRepo.markCompleted(transactionId, subscriptionId);
@@ -164,7 +168,7 @@ async function handler(event) {
         // Log error telemetry if we have vehicle context
         try {
             const body = event.body ? JSON.parse(event.body) : {};
-            if (body.vehicleId && body.featureId) {
+            if (typeof body.vehicleId === 'string' && typeof body.featureId === 'string') {
                 await telemetryRepo.logError(body.vehicleId, body.featureId, fodError);
             }
         }

@@ -3,7 +3,7 @@
  * Defines collection names, indexes, and validation schemas
  */
 
-import { Db, CreateIndexesOptions } from 'mongodb';
+import { Db, IndexSpecification, CreateIndexesOptions } from 'mongodb';
 
 // Collection names
 export const COLLECTIONS = {
@@ -14,7 +14,10 @@ export const COLLECTIONS = {
 } as const;
 
 // Index definitions
-export const INDEXES = {
+export const INDEXES: Record<
+  string,
+  Array<{ key: IndexSpecification; options: CreateIndexesOptions }>
+> = {
   features: [
     {
       key: { featureId: 1 },
@@ -40,16 +43,16 @@ export const INDEXES = {
     },
     {
       key: { expiresAt: 1 },
-      options: { 
+      options: {
         name: 'idx_expires_at',
-        partialFilterExpression: { expiresAt: { $exists: true } }
+        partialFilterExpression: { expiresAt: { $exists: true } },
       },
     },
     {
       key: { status: 1, expiresAt: 1 },
-      options: { 
+      options: {
         name: 'idx_status_expires',
-        partialFilterExpression: { expiresAt: { $exists: true } }
+        partialFilterExpression: { expiresAt: { $exists: true } },
       },
     },
   ],
@@ -78,9 +81,9 @@ export const INDEXES = {
     },
     {
       key: { timestamp: 1 },
-      options: { 
+      options: {
         name: 'idx_timestamp_ttl',
-        expireAfterSeconds: 7776000 // 90 days
+        expireAfterSeconds: 7776000, // 90 days
       },
     },
   ],
@@ -225,7 +228,13 @@ export const VALIDATION_SCHEMAS = {
           description: 'Vehicle VIN',
         },
         eventType: {
-          enum: ['FEATURE_ACTIVATED', 'FEATURE_DEACTIVATED', 'FEATURE_USED', 'ERROR', 'STATE_CHANGE'],
+          enum: [
+            'FEATURE_ACTIVATED',
+            'FEATURE_DEACTIVATED',
+            'FEATURE_USED',
+            'ERROR',
+            'STATE_CHANGE',
+          ],
           description: 'Type of telemetry event',
         },
         featureId: {
@@ -250,7 +259,7 @@ export const VALIDATION_SCHEMAS = {
  */
 export async function createCollections(db: Db): Promise<void> {
   const existingCollections = await db.listCollections().toArray();
-  const existingNames = existingCollections.map(c => c.name);
+  const existingNames = existingCollections.map((c) => c.name);
 
   for (const [collectionName, schema] of Object.entries(VALIDATION_SCHEMAS)) {
     if (!existingNames.includes(collectionName)) {
@@ -259,6 +268,8 @@ export async function createCollections(db: Db): Promise<void> {
         validationLevel: 'strict',
         validationAction: 'error',
       });
+      // Note: Using console.log for setup scripts is acceptable
+      // eslint-disable-next-line no-console
       console.log(`Created collection: ${collectionName}`);
     } else {
       // Update validation schema for existing collection
@@ -267,6 +278,7 @@ export async function createCollections(db: Db): Promise<void> {
         validator: schema,
         validationLevel: 'strict',
       });
+      // eslint-disable-next-line no-console
       console.log(`Updated validation for collection: ${collectionName}`);
     }
   }
@@ -278,14 +290,17 @@ export async function createCollections(db: Db): Promise<void> {
 export async function createIndexes(db: Db): Promise<void> {
   for (const [collectionName, indexes] of Object.entries(INDEXES)) {
     const collection = db.collection(collectionName);
-    
+
     for (const indexDef of indexes) {
       try {
-        await collection.createIndex(indexDef.key as any, indexDef.options);
+        await collection.createIndex(indexDef.key, indexDef.options);
+        // eslint-disable-next-line no-console
         console.log(`Created index ${indexDef.options.name} on ${collectionName}`);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Index might already exist
-        if (error.code !== 85 && error.code !== 86) {
+        const mongoError = error as { code?: number };
+        if (mongoError.code !== 85 && mongoError.code !== 86) {
+          // eslint-disable-next-line no-console
           console.error(`Failed to create index ${indexDef.options.name}:`, error);
         }
       }

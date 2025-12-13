@@ -3,12 +3,12 @@
  * Based on Qualcomm Car-to-Cloud SDK specification
  */
 
-export type MessageType = 
-  | 'FEATURE_ACTIVATION' 
-  | 'FEATURE_DEACTIVATION' 
+export type MessageType =
+  | 'FEATURE_ACTIVATION'
+  | 'FEATURE_DEACTIVATION'
   | 'FEATURE_ACTIVATION_ACK'
   | 'FEATURE_DEACTIVATION_ACK'
-  | 'STATE_QUERY' 
+  | 'STATE_QUERY'
   | 'STATE_RESPONSE'
   | 'TELEMETRY';
 
@@ -132,8 +132,8 @@ export interface TelemetryMessage extends BaseMessage {
 /**
  * Union type for all message types
  */
-export type Message = 
-  | FeatureActivationMessage 
+export type Message =
+  | FeatureActivationMessage
   | FeatureDeactivationMessage
   | FeatureActivationAckMessage
   | FeatureDeactivationAckMessage
@@ -175,7 +175,9 @@ export function validateBaseMessage(message: any): boolean {
 /**
  * Validate feature activation message
  */
-export function validateFeatureActivationMessage(message: any): message is FeatureActivationMessage {
+export function validateFeatureActivationMessage(
+  message: any
+): message is FeatureActivationMessage {
   if (!validateBaseMessage(message)) {
     return false;
   }

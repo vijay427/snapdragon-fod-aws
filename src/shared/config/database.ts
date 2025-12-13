@@ -29,16 +29,18 @@ async function getConnectionString(): Promise<string> {
   const region = process.env.AWS_REGION || 'us-east-1';
 
   const client = new SecretsManagerClient({ region });
-  
+
   try {
-    const response = await client.send(new GetSecretValueCommand({
-      SecretId: secretName,
-    }));
-    
+    const response = await client.send(
+      new GetSecretValueCommand({
+        SecretId: secretName,
+      })
+    );
+
     if (!response.SecretString) {
       throw new Error('Secret value is empty');
     }
-    
+
     const secret = JSON.parse(response.SecretString);
     return secret.connectionString;
   } catch (error: any) {
@@ -73,19 +75,19 @@ export async function connectToDatabase(): Promise<Db> {
 
     // Create new client
     const client = new MongoClient(connectionString, options);
-    
+
     // Connect to MongoDB
     await client.connect();
-    
+
     // Verify connection
     await client.db('admin').command({ ping: 1 });
-    
+
     console.log('Successfully connected to MongoDB Atlas');
-    
+
     // Cache the connection
     cachedClient = client;
     cachedDb = client.db(dbName);
-    
+
     return cachedDb;
   } catch (error: any) {
     console.error('MongoDB connection error:', error);
@@ -123,7 +125,7 @@ export async function checkDatabaseHealth(): Promise<boolean> {
     if (!cachedClient) {
       return false;
     }
-    
+
     await cachedClient.db('admin').command({ ping: 1 });
     return true;
   } catch (error) {

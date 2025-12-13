@@ -22,7 +22,7 @@ export class TransactionRepository {
     try {
       const collection = await this.getCollection();
       const result = await collection.findOne({ transactionId });
-      return result as Transaction | null;
+      return result as unknown as Transaction | null;
     } catch (error: any) {
       throw new DatabaseError('findById', error.message, { transactionId });
     }
@@ -51,10 +51,7 @@ export class TransactionRepository {
   async findBySubscription(subscriptionId: string): Promise<Transaction[]> {
     try {
       const collection = await this.getCollection();
-      const results = await collection
-        .find({ subscriptionId })
-        .sort({ timestamp: -1 })
-        .toArray();
+      const results = await collection.find({ subscriptionId }).sort({ timestamp: -1 }).toArray();
       return results as unknown as Transaction[];
     } catch (error: any) {
       throw new DatabaseError('findBySubscription', error.message, { subscriptionId });

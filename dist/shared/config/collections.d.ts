@@ -2,173 +2,17 @@
  * MongoDB Collection Definitions and Schemas
  * Defines collection names, indexes, and validation schemas
  */
-import { Db } from 'mongodb';
+import { Db, IndexSpecification, CreateIndexesOptions } from 'mongodb';
 export declare const COLLECTIONS: {
     readonly FEATURES: "features";
     readonly SUBSCRIPTIONS: "subscriptions";
     readonly TRANSACTIONS: "transactions";
     readonly TELEMETRY: "telemetry";
 };
-export declare const INDEXES: {
-    features: ({
-        key: {
-            featureId: number;
-            featureType?: undefined;
-        };
-        options: {
-            unique: boolean;
-            name: string;
-        };
-    } | {
-        key: {
-            featureType: number;
-            featureId?: undefined;
-        };
-        options: {
-            name: string;
-            unique?: undefined;
-        };
-    })[];
-    subscriptions: ({
-        key: {
-            subscriptionId: number;
-            vehicleId?: undefined;
-            featureId?: undefined;
-            status?: undefined;
-            expiresAt?: undefined;
-        };
-        options: {
-            unique: boolean;
-            name: string;
-            partialFilterExpression?: undefined;
-        };
-    } | {
-        key: {
-            vehicleId: number;
-            featureId: number;
-            subscriptionId?: undefined;
-            status?: undefined;
-            expiresAt?: undefined;
-        };
-        options: {
-            name: string;
-            unique?: undefined;
-            partialFilterExpression?: undefined;
-        };
-    } | {
-        key: {
-            vehicleId: number;
-            status: number;
-            subscriptionId?: undefined;
-            featureId?: undefined;
-            expiresAt?: undefined;
-        };
-        options: {
-            name: string;
-            unique?: undefined;
-            partialFilterExpression?: undefined;
-        };
-    } | {
-        key: {
-            expiresAt: number;
-            subscriptionId?: undefined;
-            vehicleId?: undefined;
-            featureId?: undefined;
-            status?: undefined;
-        };
-        options: {
-            name: string;
-            partialFilterExpression: {
-                expiresAt: {
-                    $exists: boolean;
-                };
-            };
-            unique?: undefined;
-        };
-    } | {
-        key: {
-            status: number;
-            expiresAt: number;
-            subscriptionId?: undefined;
-            vehicleId?: undefined;
-            featureId?: undefined;
-        };
-        options: {
-            name: string;
-            partialFilterExpression: {
-                expiresAt: {
-                    $exists: boolean;
-                };
-            };
-            unique?: undefined;
-        };
-    })[];
-    transactions: ({
-        key: {
-            transactionId: number;
-            vehicleId?: undefined;
-            timestamp?: undefined;
-            subscriptionId?: undefined;
-        };
-        options: {
-            unique: boolean;
-            name: string;
-        };
-    } | {
-        key: {
-            vehicleId: number;
-            timestamp: number;
-            transactionId?: undefined;
-            subscriptionId?: undefined;
-        };
-        options: {
-            name: string;
-            unique?: undefined;
-        };
-    } | {
-        key: {
-            subscriptionId: number;
-            transactionId?: undefined;
-            vehicleId?: undefined;
-            timestamp?: undefined;
-        };
-        options: {
-            name: string;
-            unique?: undefined;
-        };
-    })[];
-    telemetry: ({
-        key: {
-            vehicleId: number;
-            timestamp: number;
-            eventType?: undefined;
-        };
-        options: {
-            name: string;
-            expireAfterSeconds?: undefined;
-        };
-    } | {
-        key: {
-            eventType: number;
-            timestamp: number;
-            vehicleId?: undefined;
-        };
-        options: {
-            name: string;
-            expireAfterSeconds?: undefined;
-        };
-    } | {
-        key: {
-            timestamp: number;
-            vehicleId?: undefined;
-            eventType?: undefined;
-        };
-        options: {
-            name: string;
-            expireAfterSeconds: number;
-        };
-    })[];
-};
+export declare const INDEXES: Record<string, Array<{
+    key: IndexSpecification;
+    options: CreateIndexesOptions;
+}>>;
 export declare const VALIDATION_SCHEMAS: {
     features: {
         $jsonSchema: {

@@ -21,37 +21,69 @@ const featureRepo = new FeatureRepository_1.FeatureRepository();
 const subscriptionRepo = new SubscriptionRepository_1.SubscriptionRepository();
 const telemetryRepo = new TelemetryRepository_1.TelemetryRepository();
 /**
+ * Valid tier values
+ */
+const VALID_TIERS = ['4G', '5G'];
+/**
+ * Valid mode values
+ */
+const VALID_MODES = ['SPORT', 'ECO', 'COMFORT'];
+/**
+ * Type guard for tier values
+ */
+function isValidTier(value) {
+    return typeof value === 'string' && VALID_TIERS.includes(value);
+}
+/**
+ * Type guard for mode values
+ */
+function isValidMode(value) {
+    return typeof value === 'string' && VALID_MODES.includes(value);
+}
+/**
+ * Get error message from unknown error
+ */
+function getErrorMessage(error) {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return String(error);
+}
+/**
  * Build activation configuration based on feature metadata
  */
 function buildActivationConfig(feature) {
     const config = {};
-    if (feature.metadata) {
+    const metadata = feature.metadata;
+    if (metadata) {
         // Connectivity tier configuration
-        if (feature.metadata.tier) {
-            config.tier = feature.metadata.tier;
+        if (isValidTier(metadata['tier'])) {
+            config.tier = metadata['tier'];
         }
         // Performance mode configuration
-        if (feature.metadata.mode) {
-            config.mode = feature.metadata.mode;
+        if (isValidMode(metadata['mode'])) {
+            config.mode = metadata['mode'];
         }
         // Additional parameters
-        if (feature.metadata.throttleResponse) {
-            config.parameters = config.parameters || {};
-            config.parameters.throttleResponse = feature.metadata.throttleResponse;
+        const knownKeys = ['tier', 'mode', 'throttleResponse', 'suspensionStiffness', 'steeringWeight'];
+        if (typeof metadata['throttleResponse'] === 'string') {
+            config.parameters = config.parameters ?? {};
+            config.parameters['throttleResponse'] = metadata['throttleResponse'];
         }
-        if (feature.metadata.suspensionStiffness) {
-            config.parameters = config.parameters || {};
-            config.parameters.suspensionStiffness = feature.metadata.suspensionStiffness;
+        if (typeof metadata['suspensionStiffness'] === 'string') {
+            config.parameters = config.parameters ?? {};
+            config.parameters['suspensionStiffness'] = metadata['suspensionStiffness'];
         }
-        if (feature.metadata.steeringWeight) {
-            config.parameters = config.parameters || {};
-            config.parameters.steeringWeight = feature.metadata.steeringWeight;
+        if (typeof metadata['steeringWeight'] === 'string') {
+            config.parameters = config.parameters ?? {};
+            config.parameters['steeringWeight'] = metadata['steeringWeight'];
         }
         // Copy any other metadata parameters
-        Object.keys(feature.metadata).forEach((key) => {
-            if (!['tier', 'mode', 'throttleResponse', 'suspensionStiffness', 'steeringWeight'].includes(key)) {
-                config.parameters = config.parameters || {};
-                config.parameters[key] = feature.metadata[key];
+        Object.keys(metadata).forEach((key) => {
+            if (!knownKeys.includes(key)) {
+                config.parameters = config.parameters ?? {};
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                config.parameters[key] = metadata[key];
             }
         });
     }
@@ -69,17 +101,19 @@ async function publishActivationMessage(vehicleId, message) {
             qos: 1, // At least once delivery
         });
         await iotClient.send(command);
+        // eslint-disable-next-line no-console
         console.log(`Activation message published to topic: ${topic}`);
     }
     catch (error) {
         console.error('Failed to publish to IoT Core:', error);
-        throw new Errors_1.FeatureActivationError(`Failed to publish activation message: ${error.message}`, vehicleId, message.payload.featureId);
+        throw new Errors_1.FeatureActivationError(`Failed to publish activation message: ${getErrorMessage(error)}`, vehicleId, message.payload.featureId);
     }
 }
 /**
  * Process single activation request
  */
 async function processActivation(request) {
+    // eslint-disable-next-line no-console
     console.log('Processing activation:', request);
     try {
         // 1. Validate subscription exists
@@ -100,6 +134,7 @@ async function processActivation(request) {
             ...messageBase,
             messageId: (0, signing_1.generateMessageId)(),
         };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const signedMessage = await (0, signing_1.signAndAddSignature)(messageWithId);
         // 5. Publish to IoT Core
         await publishActivationMessage(request.vehicleId, signedMessage);
@@ -108,6 +143,7 @@ async function processActivation(request) {
             subscriptionId: request.subscriptionId,
             messageId: signedMessage.messageId,
         });
+        // eslint-disable-next-line no-console
         console.log('Activation processed successfully:', request.subscriptionId);
     }
     catch (error) {
@@ -133,6 +169,7 @@ async function processActivation(request) {
  * Main Lambda handler (triggered by SQS)
  */
 async function handler(event) {
+    // eslint-disable-next-line no-console
     console.log('Activation handler triggered:', JSON.stringify(event));
     const results = await Promise.allSettled(event.Records.map(async (record) => {
         try {
@@ -147,6 +184,7 @@ async function handler(event) {
     // Log summary
     const successful = results.filter((r) => r.status === 'fulfilled').length;
     const failed = results.filter((r) => r.status === 'rejected').length;
+    // eslint-disable-next-line no-console
     console.log(`Activation batch complete: ${successful} successful, ${failed} failed`);
     // If any failed, throw error to trigger SQS retry
     if (failed > 0) {

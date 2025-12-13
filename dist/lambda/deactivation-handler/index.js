@@ -6,7 +6,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = handler;
 const client_iot_data_plane_1 = require("@aws-sdk/client-iot-data-plane");
-const FeatureRepository_1 = require("../../shared/repositories/FeatureRepository");
 const SubscriptionRepository_1 = require("../../shared/repositories/SubscriptionRepository");
 const TelemetryRepository_1 = require("../../shared/repositories/TelemetryRepository");
 const Messages_1 = require("../../shared/models/Messages");
@@ -17,9 +16,17 @@ const iotClient = new client_iot_data_plane_1.IoTDataPlaneClient({
     region: process.env.AWS_REGION || 'us-east-1',
 });
 // Initialize repositories
-const featureRepo = new FeatureRepository_1.FeatureRepository();
 const subscriptionRepo = new SubscriptionRepository_1.SubscriptionRepository();
 const telemetryRepo = new TelemetryRepository_1.TelemetryRepository();
+/**
+ * Get error message from unknown error
+ */
+function getErrorMessage(error) {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return String(error);
+}
 /**
  * Publish deactivation message to IoT Core
  */
@@ -32,17 +39,19 @@ async function publishDeactivationMessage(vehicleId, message) {
             qos: 1, // At least once delivery
         });
         await iotClient.send(command);
+        // eslint-disable-next-line no-console
         console.log(`Deactivation message published to topic: ${topic}`);
     }
     catch (error) {
         console.error('Failed to publish to IoT Core:', error);
-        throw new Errors_1.FeatureDeactivationError(`Failed to publish deactivation message: ${error.message}`, vehicleId, message.payload.featureId);
+        throw new Errors_1.FeatureDeactivationError(`Failed to publish deactivation message: ${getErrorMessage(error)}`, vehicleId, message.payload.featureId);
     }
 }
 /**
  * Process single deactivation request
  */
 async function processDeactivation(request) {
+    // eslint-disable-next-line no-console
     console.log('Processing deactivation:', request);
     try {
         // 1. Validate subscription exists
@@ -58,6 +67,7 @@ async function processDeactivation(request) {
             ...messageBase,
             messageId: (0, signing_1.generateMessageId)(),
         };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const signedMessage = await (0, signing_1.signAndAddSignature)(messageWithId);
         // 4. Publish to IoT Core
         await publishDeactivationMessage(request.vehicleId, signedMessage);
@@ -74,6 +84,7 @@ async function processDeactivation(request) {
             reason: request.reason,
             messageId: signedMessage.messageId,
         });
+        // eslint-disable-next-line no-console
         console.log('Deactivation processed successfully:', request.subscriptionId);
     }
     catch (error) {
@@ -92,6 +103,7 @@ async function processDeactivation(request) {
  * Main Lambda handler (triggered by SQS)
  */
 async function handler(event) {
+    // eslint-disable-next-line no-console
     console.log('Deactivation handler triggered:', JSON.stringify(event));
     const results = await Promise.allSettled(event.Records.map(async (record) => {
         try {
@@ -106,6 +118,7 @@ async function handler(event) {
     // Log summary
     const successful = results.filter((r) => r.status === 'fulfilled').length;
     const failed = results.filter((r) => r.status === 'rejected').length;
+    // eslint-disable-next-line no-console
     console.log(`Deactivation batch complete: ${successful} successful, ${failed} failed`);
     // If any failed, throw error to trigger SQS retry
     if (failed > 0) {

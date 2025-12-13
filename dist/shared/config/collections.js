@@ -43,14 +43,14 @@ exports.INDEXES = {
             key: { expiresAt: 1 },
             options: {
                 name: 'idx_expires_at',
-                partialFilterExpression: { expiresAt: { $exists: true } }
+                partialFilterExpression: { expiresAt: { $exists: true } },
             },
         },
         {
             key: { status: 1, expiresAt: 1 },
             options: {
                 name: 'idx_status_expires',
-                partialFilterExpression: { expiresAt: { $exists: true } }
+                partialFilterExpression: { expiresAt: { $exists: true } },
             },
         },
     ],
@@ -81,7 +81,7 @@ exports.INDEXES = {
             key: { timestamp: 1 },
             options: {
                 name: 'idx_timestamp_ttl',
-                expireAfterSeconds: 7776000 // 90 days
+                expireAfterSeconds: 7776000, // 90 days
             },
         },
     ],
@@ -225,7 +225,13 @@ exports.VALIDATION_SCHEMAS = {
                     description: 'Vehicle VIN',
                 },
                 eventType: {
-                    enum: ['FEATURE_ACTIVATED', 'FEATURE_DEACTIVATED', 'FEATURE_USED', 'ERROR', 'STATE_CHANGE'],
+                    enum: [
+                        'FEATURE_ACTIVATED',
+                        'FEATURE_DEACTIVATED',
+                        'FEATURE_USED',
+                        'ERROR',
+                        'STATE_CHANGE',
+                    ],
                     description: 'Type of telemetry event',
                 },
                 featureId: {
@@ -249,7 +255,7 @@ exports.VALIDATION_SCHEMAS = {
  */
 async function createCollections(db) {
     const existingCollections = await db.listCollections().toArray();
-    const existingNames = existingCollections.map(c => c.name);
+    const existingNames = existingCollections.map((c) => c.name);
     for (const [collectionName, schema] of Object.entries(exports.VALIDATION_SCHEMAS)) {
         if (!existingNames.includes(collectionName)) {
             await db.createCollection(collectionName, {
@@ -257,6 +263,8 @@ async function createCollections(db) {
                 validationLevel: 'strict',
                 validationAction: 'error',
             });
+            // Note: Using console.log for setup scripts is acceptable
+            // eslint-disable-next-line no-console
             console.log(`Created collection: ${collectionName}`);
         }
         else {
@@ -266,6 +274,7 @@ async function createCollections(db) {
                 validator: schema,
                 validationLevel: 'strict',
             });
+            // eslint-disable-next-line no-console
             console.log(`Updated validation for collection: ${collectionName}`);
         }
     }
@@ -279,11 +288,14 @@ async function createIndexes(db) {
         for (const indexDef of indexes) {
             try {
                 await collection.createIndex(indexDef.key, indexDef.options);
+                // eslint-disable-next-line no-console
                 console.log(`Created index ${indexDef.options.name} on ${collectionName}`);
             }
             catch (error) {
                 // Index might already exist
-                if (error.code !== 85 && error.code !== 86) {
+                const mongoError = error;
+                if (mongoError.code !== 85 && mongoError.code !== 86) {
+                    // eslint-disable-next-line no-console
                     console.error(`Failed to create index ${indexDef.options.name}:`, error);
                 }
             }

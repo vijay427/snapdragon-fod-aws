@@ -90,6 +90,7 @@ async function seedFeatures() {
     for (const feature of features) {
         await featuresCollection.updateOne({ featureId: feature.featureId }, { $setOnInsert: feature }, { upsert: true });
     }
+    // eslint-disable-next-line no-console
     console.log(`Seeded ${features.length} features`);
 }
 /**
@@ -97,22 +98,29 @@ async function seedFeatures() {
  */
 async function setupDatabase() {
     try {
+        // eslint-disable-next-line no-console
         console.log('Starting database setup...');
         // Connect to database
         const db = await (0, database_1.connectToDatabase)();
+        // eslint-disable-next-line no-console
         console.log('Connected to MongoDB Atlas');
         // Create collections with validation
         await (0, collections_1.createCollections)(db);
+        // eslint-disable-next-line no-console
         console.log('Collections created/updated');
         // Create indexes
         await (0, collections_1.createIndexes)(db);
+        // eslint-disable-next-line no-console
         console.log('Indexes created');
         // Seed initial data
         await seedFeatures();
+        // eslint-disable-next-line no-console
         console.log('Initial data seeded');
+        // eslint-disable-next-line no-console
         console.log('Database setup completed successfully');
     }
     catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Database setup failed:', error);
         throw error;
     }
@@ -124,10 +132,12 @@ async function setupDatabase() {
 if (require.main === module) {
     setupDatabase()
         .then(() => {
+        // eslint-disable-next-line no-console
         console.log('Setup complete');
         process.exit(0);
     })
         .catch((error) => {
+        // eslint-disable-next-line no-console
         console.error('Setup failed:', error);
         process.exit(1);
     });

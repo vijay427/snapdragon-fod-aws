@@ -50,10 +50,7 @@ class TransactionRepository {
     async findBySubscription(subscriptionId) {
         try {
             const collection = await this.getCollection();
-            const results = await collection
-                .find({ subscriptionId })
-                .sort({ timestamp: -1 })
-                .toArray();
+            const results = await collection.find({ subscriptionId }).sort({ timestamp: -1 }).toArray();
             return results;
         }
         catch (error) {

@@ -43,6 +43,7 @@ describe('Catalog Handler', () => {
     const result = await handler(mockEvent);
     const body = JSON.parse(result.body);
 
-    expect(Array.isArray(body.data)).toBe(true);
+    expect(Array.isArray(body.data.features)).toBe(true);
+    expect(body.data.features.length).toBeGreaterThan(0);
   });
 });

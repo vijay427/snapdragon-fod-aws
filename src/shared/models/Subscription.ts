@@ -26,7 +26,10 @@ export function validateSubscription(subscription: any): subscription is Subscri
   }
 
   // Required fields
-  if (typeof subscription.subscriptionId !== 'string' || subscription.subscriptionId.trim() === '') {
+  if (
+    typeof subscription.subscriptionId !== 'string' ||
+    subscription.subscriptionId.trim() === ''
+  ) {
     return false;
   }
 
@@ -38,7 +41,13 @@ export function validateSubscription(subscription: any): subscription is Subscri
     return false;
   }
 
-  const validStatuses: SubscriptionStatus[] = ['PENDING', 'ACTIVE', 'EXPIRED', 'DEACTIVATED', 'FAILED'];
+  const validStatuses: SubscriptionStatus[] = [
+    'PENDING',
+    'ACTIVE',
+    'EXPIRED',
+    'DEACTIVATED',
+    'FAILED',
+  ];
   if (!validStatuses.includes(subscription.status)) {
     return false;
   }

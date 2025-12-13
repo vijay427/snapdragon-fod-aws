@@ -6,5 +6,5 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 /**
  * Main Lambda handler
  */
-export declare function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult>;
+export declare function handler(event: APIGatewayProxyEvent): APIGatewayProxyResult;
 //# sourceMappingURL=index.d.ts.map

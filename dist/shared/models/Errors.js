@@ -45,7 +45,9 @@ class FeatureNotFoundError extends FODError {
 exports.FeatureNotFoundError = FeatureNotFoundError;
 class FeatureNotAvailableError extends FODError {
     constructor(featureId) {
-        super(`Feature not available for purchase: ${featureId}`, 'FEATURE_NOT_AVAILABLE', 400, { featureId });
+        super(`Feature not available for purchase: ${featureId}`, 'FEATURE_NOT_AVAILABLE', 400, {
+            featureId,
+        });
         this.name = 'FeatureNotAvailableError';
     }
 }
@@ -55,7 +57,9 @@ exports.FeatureNotAvailableError = FeatureNotAvailableError;
  */
 class SubscriptionNotFoundError extends FODError {
     constructor(subscriptionId) {
-        super(`Subscription not found: ${subscriptionId}`, 'SUBSCRIPTION_NOT_FOUND', 404, { subscriptionId });
+        super(`Subscription not found: ${subscriptionId}`, 'SUBSCRIPTION_NOT_FOUND', 404, {
+            subscriptionId,
+        });
         this.name = 'SubscriptionNotFoundError';
     }
 }
@@ -69,7 +73,9 @@ class DuplicateSubscriptionError extends FODError {
 exports.DuplicateSubscriptionError = DuplicateSubscriptionError;
 class SubscriptionExpiredError extends FODError {
     constructor(subscriptionId) {
-        super(`Subscription has expired: ${subscriptionId}`, 'SUBSCRIPTION_EXPIRED', 400, { subscriptionId });
+        super(`Subscription has expired: ${subscriptionId}`, 'SUBSCRIPTION_EXPIRED', 400, {
+            subscriptionId,
+        });
         this.name = 'SubscriptionExpiredError';
     }
 }
@@ -79,7 +85,9 @@ exports.SubscriptionExpiredError = SubscriptionExpiredError;
  */
 class TransactionNotFoundError extends FODError {
     constructor(transactionId) {
-        super(`Transaction not found: ${transactionId}`, 'TRANSACTION_NOT_FOUND', 404, { transactionId });
+        super(`Transaction not found: ${transactionId}`, 'TRANSACTION_NOT_FOUND', 404, {
+            transactionId,
+        });
         this.name = 'TransactionNotFoundError';
     }
 }
@@ -152,7 +160,11 @@ exports.MessageExpiredError = MessageExpiredError;
  */
 class DatabaseError extends FODError {
     constructor(operation, reason, details) {
-        super(`Database operation failed: ${operation} - ${reason}`, 'DATABASE_ERROR', 500, { operation, reason, ...details });
+        super(`Database operation failed: ${operation} - ${reason}`, 'DATABASE_ERROR', 500, {
+            operation,
+            reason,
+            ...details,
+        });
         this.name = 'DatabaseError';
     }
 }

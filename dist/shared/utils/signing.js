@@ -108,7 +108,7 @@ function generateKeyPair() {
  */
 function createSigningPayload(message) {
     // Create a copy without the signature field
-    const { signature, ...messageWithoutSignature } = message;
+    const { signature: _, ...messageWithoutSignature } = message;
     // Sort keys for consistent signing
     const sortedMessage = sortObjectKeys(messageWithoutSignature);
     // Convert to JSON string

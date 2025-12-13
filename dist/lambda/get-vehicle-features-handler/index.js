@@ -5,20 +5,20 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = handler;
-const models_1 = require("@shared/models");
-const models_2 = require("@shared/models");
-const models_3 = require("@shared/models");
+const Errors_1 = require("../../shared/models/Errors");
 /**
  * Main Lambda handler
  */
-async function handler(event) {
+function handler(event) {
+    // eslint-disable-next-line no-console
     console.log('Get vehicle features request received:', JSON.stringify(event));
     try {
         // Get vehicleId from path parameters
         const vehicleId = event.pathParameters?.vehicleId;
         if (!vehicleId) {
-            throw new models_3.ValidationError('vehicleId', 'Vehicle ID is required in path');
+            throw new Errors_1.ValidationError('vehicleId', 'Vehicle ID is required in path');
         }
+        // eslint-disable-next-line no-console
         console.log('Fetching features for vehicle:', vehicleId);
         // Mock data for testing (until MongoDB is configured)
         const mockFeatures = [
@@ -47,6 +47,7 @@ async function handler(event) {
                 autoRenew: false,
             },
         ];
+        // eslint-disable-next-line no-console
         console.log(`Returning ${mockFeatures.length} mock features for vehicle ${vehicleId}`);
         return {
             statusCode: 200,
@@ -69,7 +70,7 @@ async function handler(event) {
     }
     catch (error) {
         console.error('Get vehicle features failed:', error);
-        const fodError = (0, models_2.isFODError)(error) ? error : (0, models_1.toFODError)(error);
+        const fodError = (0, Errors_1.isFODError)(error) ? error : (0, Errors_1.toFODError)(error);
         return {
             statusCode: fodError.statusCode,
             headers: {

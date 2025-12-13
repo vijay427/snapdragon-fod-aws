@@ -5,5 +5,5 @@
 /**
  * Main Lambda handler (triggered by IoT Core rule)
  */
-export declare function handler(event: any): Promise<void>;
+export declare function handler(event: unknown): Promise<void>;
 //# sourceMappingURL=index.d.ts.map

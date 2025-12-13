@@ -8,6 +8,8 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Please scan the currently open file (src/lambda/catalog-handler/index.ts) for any TODO or FIXME comments.\n\nFor each TODO found:\n1. Show me the TODO text and line number\n2. Ask if I want to create a GitHub issue for it\n3. If I confirm, use the GitHub MCP server to create an issue with:\n   - Title: The TODO text (cleaned up)\n   - Body: Include file location (src/lambda/catalog-handler/index.ts:LINE_NUMBER), the TODO context, and any relevant code snippets\n   - Labels: ['todo', 'enhancement']\n\nPlease show me each step of the process so I can monitor the flow."
-  }
+    "prompt": "Please scan the currently open file (src/lambda/test-activation-handler/index.js) for any TODO or FIXME comments.\n\n\nFor each TODO found:\n1. Show me the TODO text and line number\n2. Ask if I want to create a GitHub issue for it\n3. If I confirm, use the GitHub MCP server to create an issue with:\n   - Title: The TODO text (cleaned up)\n   - Body: Include file location (src/lambda/catalog-handler/index.ts:LINE_NUMBER), the TODO context, and any relevant code snippets\n   - Labels: ['todo', 'enhancement']\n\nPlease show me each step of the process so I can monitor the flow."
+  },
+  "workspaceFolderName": "snapdragon-fod-aws",
+  "shortName": "manual-scan-todos"
 }
