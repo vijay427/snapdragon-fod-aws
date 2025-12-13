@@ -14,6 +14,7 @@ const MONGODB_URI = process.env.MONGODB_URI || '';
 /**
  * Make HTTP request to HTTP Bridge
  */
+//TODO: Add caching layer using Redis or ElastiCache for better performance
 function makeHttpRequest(url, method, data) {
   return new Promise((resolve, reject) => {
     const urlObj = new URL(url);

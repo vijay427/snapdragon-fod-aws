@@ -7,9 +7,9 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { TransactionRepository } from '../../repositories/transaction-repository';
-import { SubscriptionRepository } from '../../repositories/subscription-repository';
-import { Transaction, Subscription } from '../../models/types';
+import { TransactionRepository } from '../../shared/repositories/TransactionRepository';
+import { SubscriptionRepository } from '../../shared/repositories/SubscriptionRepository';
+import { Transaction, Subscription } from '../../shared/models';
 
 // Environment variables
 const MONGODB_URI = process.env.MONGODB_URI || '';
@@ -18,12 +18,12 @@ const HTTP_BRIDGE_API_KEY = process.env.HTTP_BRIDGE_API_KEY;
 const HTTP_BRIDGE_TIMEOUT = parseInt(process.env.HTTP_BRIDGE_TIMEOUT || '30000', 10);
 
 // Initialize repositories
-const transactionRepo = new TransactionRepository(MONGODB_URI);
-const subscriptionRepo = new SubscriptionRepository(MONGODB_URI);
+const transactionRepo = new TransactionRepository();
+const subscriptionRepo = new SubscriptionRepository();
 
 // Correlation ID for request tracing
 function generateCorrelationId(): string {
-  return `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 // CORS headers
@@ -101,48 +101,37 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const transactionId = uuidv4();
     const transaction: Transaction = {
       transactionId,
-      userId,
       vehicleId,
       featureId,
       amount: 99.99, // Mock amount
-      currency: 'USD',
       status: 'COMPLETED',
-      createdAt: new Date(),
-      completedAt: new Date(),
-      metadata: {
-        testMode: true,
-        source: 'TEST_ENDPOINT',
-        correlationId
-      }
+      paymentMethod: 'TEST',
+      timestamp: new Date()
     };
 
-    await transactionRepo.createTransaction(transaction);
+    await transactionRepo.create(transaction);
     console.log('Transaction created', { correlationId, transactionId });
     timing.transaction = Date.now() - transactionStart;
 
     // Step 2: Create subscription
     const subscriptionStart = Date.now();
     const subscriptionId = uuidv4();
+    const purchasedAt = new Date();
     const activatedAt = new Date();
     const expiresAt = isPermanent ? undefined : (duration ? new Date(activatedAt.getTime() + duration * 60 * 60 * 1000) : undefined);
 
     const subscription: Subscription = {
       subscriptionId,
-      userId,
       vehicleId,
       featureId,
       status: 'ACTIVE',
+      purchasedAt,
       activatedAt,
       expiresAt,
-      isPermanent: isPermanent || false,
-      metadata: {
-        testMode: true,
-        transactionId,
-        correlationId
-      }
+      isPermanent: isPermanent || false
     };
 
-    await subscriptionRepo.createSubscription(subscription);
+    await subscriptionRepo.create(subscription);
     console.log('Subscription created', { correlationId, subscriptionId });
     timing.subscription = Date.now() - subscriptionStart;
 
@@ -210,13 +199,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           transaction: {
             transactionId: transaction.transactionId,
             amount: transaction.amount,
-            currency: transaction.currency,
-            timestamp: transaction.createdAt.toISOString()
+            timestamp: transaction.timestamp.toISOString()
           },
           subscription: {
             subscriptionId: subscription.subscriptionId,
             featureId: subscription.featureId,
-            activatedAt: subscription.activatedAt.toISOString(),
+            activatedAt: subscription.activatedAt?.toISOString(),
             expiresAt: subscription.expiresAt?.toISOString(),
             isPermanent: subscription.isPermanent
           },
