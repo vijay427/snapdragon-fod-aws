@@ -114,7 +114,7 @@ export class ComputeStack extends cdk.Stack {
       '.kiro'
     ];
 
-    // Helper method to create Lambda asset with proper exclusions
+    // CRITICAL FIX: Use explicit source-only copying to prevent recursive inclusion
     const createLambdaAsset = (functionName: string): lambda.Code => {
       return lambda.Code.fromAsset(path.join(__dirname, `../../src/lambda/${functionName}`), {
         exclude: commonExclusions,
@@ -124,16 +124,26 @@ export class ComputeStack extends cdk.Stack {
           image: lambda.Runtime.NODEJS_18_X.bundlingImage,
           command: [
             'bash', '-c', [
-              'echo "Starting Lambda bundling for ' + functionName + '"',
-              'cp -r /asset-input/* /asset-output/ 2>/dev/null || true',
+              'echo "=== CRITICAL FIX: Explicit source-only bundling for ' + functionName + ' ==="',
+              'mkdir -p /asset-output',
+              'cd /asset-input',
+              // Only copy specific files we need - NEVER copy directories that might contain recursive structures
+              'find . -maxdepth 1 -name "*.js" -exec cp {} /asset-output/ \\;',
+              'find . -maxdepth 1 -name "*.ts" -exec cp {} /asset-output/ \\;',
+              'find . -maxdepth 1 -name "*.json" -exec cp {} /asset-output/ \\;',
+              // Copy shared directory if it exists, but only from the specific lambda directory
+              'if [ -d "./shared" ]; then cp -r ./shared /asset-output/; fi',
+              // Copy lambda subdirectory if it exists (for test-activation-handler)
+              'if [ -d "./lambda" ]; then cp -r ./lambda /asset-output/; fi',
               'cd /asset-output',
-              'find . -name "cdk.out" -type d -exec rm -rf {} + 2>/dev/null || true',
-              'find . -name "infrastructure" -type d -exec rm -rf {} + 2>/dev/null || true',
-              'find . -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true',
-              'find . -name ".git" -type d -exec rm -rf {} + 2>/dev/null || true',
-              'find . -name "*.test.*" -type f -delete 2>/dev/null || true',
-              'find . -name "*.spec.*" -type f -delete 2>/dev/null || true',
-              'echo "Bundling complete for ' + functionName + '"'
+              // Ensure no problematic directories exist
+              'rm -rf cdk.out infrastructure node_modules .git .github tests docs coverage .nyc_output .vscode mcp-servers scripts .kiro 2>/dev/null || true',
+              // List final contents for debugging
+              'echo "=== Final bundle contents for ' + functionName + ' ==="',
+              'find . -type f | head -20',
+              'echo "=== Bundle size ==="',
+              'du -sh .',
+              'echo "=== Bundling complete for ' + functionName + ' ==="'
             ].join(' && ')
           ],
           user: 'root'
