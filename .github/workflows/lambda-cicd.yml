@@ -1,5 +1,7 @@
 name: Lambda CI/CD Pipeline
 
+run-name: 🚀 Lambda CI/CD Pipeline - ${{ github.event_name }} (${{ github.ref_name }})
+
 on:
   # Manual trigger
   workflow_dispatch:
@@ -227,12 +229,12 @@ jobs:
       - name: CDK Bootstrap (if needed)
         run: |
           cd infrastructure
-          cdk bootstrap --context environment=${{ github.event.inputs.environment }}
+          cdk bootstrap --context environment=${{ needs.detect-changes.outputs.environment }}
 
       - name: CDK Synth
         run: |
           cd infrastructure
-          cdk synth --context environment=${{ github.event.inputs.environment }}
+          cdk synth --context environment=${{ needs.detect-changes.outputs.environment }}
 
       - name: CDK Deploy All Stacks
         run: |
