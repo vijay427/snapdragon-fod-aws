@@ -14,7 +14,13 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "clean": "rm -rf dist",
     "db:setup": "ts-node src/shared/config/database-setup.ts",
-    "db:test": "ts-node -e \"require('./src/shared/config/database').connectToDatabase().then(() => console.log('Connection successful')).catch(console.error)\""
+    "db:test": "ts-node -e \"require('./src/shared/config/database').connectToDatabase().then(() => console.log('Connection successful')).catch(console.error)\"",
+    "deploy": "node scripts/auto-deploy.js",
+    "deploy:watch": "node scripts/watch-and-deploy.js",
+    "hooks:setup": "node scripts/setup-git-hooks.js",
+    "hooks:remove": "node scripts/setup-git-hooks.js --remove",
+    "hooks:list": "node scripts/setup-git-hooks.js --list",
+    "cicd:trigger": "node scripts/trigger-cicd.js"
   },
   "keywords": [
     "snapdragon",

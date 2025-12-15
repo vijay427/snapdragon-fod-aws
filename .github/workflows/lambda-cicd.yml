@@ -1,6 +1,7 @@
 name: Lambda CI/CD Pipeline
 
 on:
+  # Manual trigger
   workflow_dispatch:
     inputs:
       environment:
@@ -12,6 +13,31 @@ on:
           - dev
           - staging
           - prod
+      force_deploy:
+        description: 'Force deploy all functions'
+        required: false
+        default: false
+        type: boolean
+
+  # Automatic triggers
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/lambda/**'
+      - 'src/shared/**'
+      - 'infrastructure/**'
+      - 'package.json'
+      - 'tsconfig.json'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/lambda/**'
+      - 'src/shared/**'
+      - 'infrastructure/**'
 
 env:
   NODE_VERSION: '18'
@@ -24,39 +50,92 @@ jobs:
     outputs:
       lambdas: ${{ steps.detect.outputs.lambdas }}
       has_changes: ${{ steps.detect.outputs.has_changes }}
+      environment: ${{ steps.detect.outputs.environment }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Detect changed Lambda functions
+      - name: Determine environment and changes
         id: detect
         run: |
+          # Determine environment based on trigger
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ENVIRONMENT="${{ github.event.inputs.environment }}"
+            FORCE_DEPLOY="${{ github.event.inputs.force_deploy }}"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            ENVIRONMENT="prod"
+            FORCE_DEPLOY="false"
+          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            ENVIRONMENT="staging"
+            FORCE_DEPLOY="false"
+          else
+            ENVIRONMENT="dev"
+            FORCE_DEPLOY="false"
+          fi
+          
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "🎯 Target environment: $ENVIRONMENT"
+          
           # Get all Lambda directories
           LAMBDA_DIRS=$(find src/lambda -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
           
-          # Check for changes in last commit or all lambdas if forced
+          # Detect changed Lambda functions
           CHANGED_LAMBDAS=""
-          for dir in $LAMBDA_DIRS; do
-            if git diff --name-only HEAD~1 HEAD | grep -q "src/lambda/$dir/"; then
-              CHANGED_LAMBDAS="$CHANGED_LAMBDAS $dir"
-            fi
-          done
           
-          # If no changes detected, deploy all (for manual trigger)
-          if [ -z "$CHANGED_LAMBDAS" ]; then
+          if [ "$FORCE_DEPLOY" = "true" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Deploy all functions for manual trigger or force deploy
             CHANGED_LAMBDAS="$LAMBDA_DIRS"
+            echo "🚀 Force deploy: deploying all Lambda functions"
+          else
+            # Check for changes in specific paths
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              # For PR, compare against base branch
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+              HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+              CHANGED_FILES=$(git diff --name-only $BASE_SHA..$HEAD_SHA)
+            else
+              # For push, compare with previous commit
+              if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+                CHANGED_FILES=$(git diff --name-only ${{ github.event.before }}..${{ github.sha }})
+              else
+                # First commit, deploy all
+                CHANGED_FILES=$(git ls-files)
+              fi
+            fi
+            
+            echo "📝 Changed files:"
+            echo "$CHANGED_FILES"
+            
+            # Check each Lambda directory for changes
+            for dir in $LAMBDA_DIRS; do
+              if echo "$CHANGED_FILES" | grep -q "src/lambda/$dir/"; then
+                CHANGED_LAMBDAS="$CHANGED_LAMBDAS $dir"
+                echo "✅ Detected changes in: $dir"
+              fi
+            done
+            
+            # Check for shared code changes (affects all Lambdas)
+            if echo "$CHANGED_FILES" | grep -q -E "(src/shared/|package\.json|tsconfig\.json|infrastructure/)"; then
+              echo "🔄 Shared code or infrastructure changed, deploying all functions"
+              CHANGED_LAMBDAS="$LAMBDA_DIRS"
+            fi
           fi
           
           # Convert to JSON array
-          LAMBDAS_JSON=$(echo $CHANGED_LAMBDAS | jq -R -s -c 'split(" ") | map(select(length > 0))')
-          
-          echo "lambdas=$LAMBDAS_JSON" >> $GITHUB_OUTPUT
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-          
-          echo "Detected Lambda functions to deploy:"
-          echo $LAMBDAS_JSON | jq .
+          if [ -n "$CHANGED_LAMBDAS" ]; then
+            LAMBDAS_JSON=$(echo $CHANGED_LAMBDAS | jq -R -s -c 'split(" ") | map(select(length > 0))')
+            echo "lambdas=$LAMBDAS_JSON" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            
+            echo "🎯 Lambda functions to deploy:"
+            echo $LAMBDAS_JSON | jq .
+          else
+            echo "lambdas=[]" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No Lambda changes detected"
+          fi
 
   build-and-test:
     name: Build and Test
@@ -161,12 +240,103 @@ jobs:
           cd infrastructure
           cdk deploy --all \
             --require-approval never \
-            --context environment=${{ github.event.inputs.environment }}
+            --context environment=${{ needs.detect-changes.outputs.environment }}
+
+  deploy-lambdas:
+    name: Deploy Lambda Functions
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-and-test, deploy-infrastructure]
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    strategy:
+      matrix:
+        lambda: ${{ fromJson(needs.detect-changes.outputs.lambdas) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get Lambda function name
+        id: lambda-name
+        run: |
+          # Convert directory name to Lambda function name
+          # e.g., activation-handler -> FOD-ActivationHandler-dev
+          LAMBDA_DIR="${{ matrix.lambda }}"
+          
+          # Convert kebab-case to PascalCase
+          PASCAL_CASE=$(echo $LAMBDA_DIR | sed -r 's/(^|-)([a-z])/\U\2/g')
+          
+          FUNCTION_NAME="FOD-Compute-${{ needs.detect-changes.outputs.environment }}-${PASCAL_CASE}"
+          echo "function_name=$FUNCTION_NAME" >> $GITHUB_OUTPUT
+          echo "Deploying to Lambda: $FUNCTION_NAME"
+
+      - name: Package Lambda function
+        run: |
+          mkdir -p lambda-package
+          
+          # Copy built JavaScript files
+          if [ -f "dist/lambda/${{ matrix.lambda }}/index.js" ]; then
+            cp dist/lambda/${{ matrix.lambda }}/index.js lambda-package/
+          fi
+          
+          # Copy TypeScript source (for CDK deployment)
+          if [ -f "src/lambda/${{ matrix.lambda }}/index.ts" ]; then
+            cp src/lambda/${{ matrix.lambda }}/index.ts lambda-package/
+          fi
+          
+          # Copy shared dependencies
+          if [ -d "dist/shared" ]; then
+            cp -r dist/shared lambda-package/
+          fi
+          
+          # Copy package files for dependencies (BOTH package.json AND package-lock.json)
+          cp package.json lambda-package/
+          cp package-lock.json lambda-package/
+          
+          # Install production dependencies only
+          cd lambda-package
+          npm ci --omit=dev
+          
+          # Create deployment package
+          zip -r ../lambda-deployment.zip .
+          cd ..
+
+      - name: Update Lambda function code
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ steps.lambda-name.outputs.function_name }} \
+            --zip-file fileb://lambda-deployment.zip \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name ${{ steps.lambda-name.outputs.function_name }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Verify deployment
+        run: |
+          # Get function configuration
+          aws lambda get-function-configuration \
+            --function-name ${{ steps.lambda-name.outputs.function_name }} \
+            --region ${{ env.AWS_REGION }} \
+            --query '{Name:FunctionName,Runtime:Runtime,LastModified:LastModified,State:State}' \
+            --output table
 
   post-deployment:
     name: Post-Deployment Verification
     runs-on: ubuntu-latest
-    needs: [deploy-infrastructure]
+    needs: [deploy-lambdas, deploy-infrastructure]
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -201,6 +371,9 @@ jobs:
       - name: Deployment summary
         run: |
           echo "✅ Deployment completed successfully!"
-          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Environment: ${{ needs.detect-changes.outputs.environment }}"
           echo "Region: ${{ env.AWS_REGION }}"
-          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"git show 3362a84d:.github/workflows/lambda-cicd.yml
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "Trigger: ${{ github.event_name }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"git show 3362a84d:.github/workflows/lambda-cicd.yml
