@@ -252,6 +252,8 @@ async function processActivation(request: ActivationRequest): Promise<void> {
 export async function handler(event: SQSEvent): Promise<void> {
   // eslint-disable-next-line no-console
   console.log('Activation handler triggered:', JSON.stringify(event));
+  // eslint-disable-next-line no-console
+  console.log('Activation Handler v1.0.1 - Deployed:', new Date().toISOString());
 
   const results = await Promise.allSettled(
     event.Records.map(async (record: SQSRecord) => {

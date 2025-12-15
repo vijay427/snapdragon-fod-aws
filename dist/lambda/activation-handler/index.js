@@ -171,6 +171,8 @@ async function processActivation(request) {
 async function handler(event) {
     // eslint-disable-next-line no-console
     console.log('Activation handler triggered:', JSON.stringify(event));
+    // eslint-disable-next-line no-console
+    console.log('Activation Handler v1.0.1 - Deployed:', new Date().toISOString());
     const results = await Promise.allSettled(event.Records.map(async (record) => {
         try {
             const request = JSON.parse(record.body);

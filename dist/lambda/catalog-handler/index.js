@@ -85,6 +85,8 @@ function handler(_event) {
                     features: mockFeatures,
                     count: mockFeatures.length,
                 },
+                version: '1.0.1',
+                deployedAt: new Date().toISOString(),
                 timestamp: new Date().toISOString(),
             }),
         };

@@ -24,8 +24,9 @@ on:
     branches:
       - main
       - develop
+      - recovered
     paths:
-      - 'src/lambda/**'
+      - 'src/lambda/activation-handler/**'
       - 'src/shared/**'
       - 'infrastructure/**'
       - 'package.json'
@@ -35,7 +36,7 @@ on:
     branches:
       - main
     paths:
-      - 'src/lambda/**'
+      - 'src/lambda/activation-handler/**'
       - 'src/shared/**'
       - 'infrastructure/**'
 
@@ -78,16 +79,16 @@ jobs:
           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
           echo "🎯 Target environment: $ENVIRONMENT"
           
-          # Get all Lambda directories
-          LAMBDA_DIRS=$(find src/lambda -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+          # Focus only on activation-handler
+          TARGET_LAMBDA="activation-handler"
           
-          # Detect changed Lambda functions
+          # Detect changes in activation handler or shared code
           CHANGED_LAMBDAS=""
           
           if [ "$FORCE_DEPLOY" = "true" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # Deploy all functions for manual trigger or force deploy
-            CHANGED_LAMBDAS="$LAMBDA_DIRS"
-            echo "🚀 Force deploy: deploying all Lambda functions"
+            # Deploy activation handler for manual trigger or force deploy
+            CHANGED_LAMBDAS="$TARGET_LAMBDA"
+            echo "🚀 Force deploy: deploying activation handler"
           else
             # Check for changes in specific paths
             if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -100,7 +101,7 @@ jobs:
               if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
                 CHANGED_FILES=$(git diff --name-only ${{ github.event.before }}..${{ github.sha }})
               else
-                # First commit, deploy all
+                # First commit, deploy activation handler
                 CHANGED_FILES=$(git ls-files)
               fi
             fi
@@ -108,18 +109,16 @@ jobs:
             echo "📝 Changed files:"
             echo "$CHANGED_FILES"
             
-            # Check each Lambda directory for changes
-            for dir in $LAMBDA_DIRS; do
-              if echo "$CHANGED_FILES" | grep -q "src/lambda/$dir/"; then
-                CHANGED_LAMBDAS="$CHANGED_LAMBDAS $dir"
-                echo "✅ Detected changes in: $dir"
-              fi
-            done
+            # Check for activation handler changes
+            if echo "$CHANGED_FILES" | grep -q "src/lambda/activation-handler/"; then
+              CHANGED_LAMBDAS="$TARGET_LAMBDA"
+              echo "✅ Detected changes in: activation-handler"
+            fi
             
-            # Check for shared code changes (affects all Lambdas)
+            # Check for shared code changes (affects activation handler)
             if echo "$CHANGED_FILES" | grep -q -E "(src/shared/|package\.json|tsconfig\.json|infrastructure/)"; then
-              echo "🔄 Shared code or infrastructure changed, deploying all functions"
-              CHANGED_LAMBDAS="$LAMBDA_DIRS"
+              echo "🔄 Shared code or infrastructure changed, deploying activation handler"
+              CHANGED_LAMBDAS="$TARGET_LAMBDA"
             fi
           fi
           

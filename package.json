@@ -17,6 +17,8 @@
     "db:test": "ts-node -e \"require('./src/shared/config/database').connectToDatabase().then(() => console.log('Connection successful')).catch(console.error)\"",
     "deploy": "node scripts/auto-deploy.js",
     "deploy:watch": "node scripts/watch-and-deploy.js",
+    "deploy:activation": "node scripts/auto-deploy-activation.js",
+    "deploy:activation:watch": "node scripts/auto-deploy-activation.js --watch",
     "hooks:setup": "node scripts/setup-git-hooks.js",
     "hooks:remove": "node scripts/setup-git-hooks.js --remove",
     "hooks:list": "node scripts/setup-git-hooks.js --list",
