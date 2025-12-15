@@ -1,17 +1,21 @@
 /**
  * Activation Handler Lambda Function (JavaScript)
  * Sends activation messages to IoT Core for vehicle feature activation
- * Version: 1.1.0 - Enhanced logging and error handling
+ * Version: 1.2.0 - Kiro Agent Hook CI/CD Integration & Enhanced Monitoring
  */
 
 exports.handler = async (event) => {
   const timestamp = new Date().toISOString();
   const correlationId = `activation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-  
-  console.log('Activation handler triggered:', {
+  //TODO:activation handler - Testing Kiro Agent Hook CI/CD Pipeline v2
+  console.log('🚀 Activation handler v1.2.0 triggered via Kiro Agent Hook:', {
     correlationId,
     timestamp,
-    event: JSON.stringify(event)
+    event: JSON.stringify(event),
+    hookVersion: '1.2.0',
+    deployedAt: new Date().toISOString(),
+    pipelineRun: 2,
+    securityCompliant: true
   });
   
   try {
@@ -34,17 +38,25 @@ exports.handler = async (event) => {
     }
     
     // Log successful activation (placeholder for IoT Core integration)
-    console.log('Feature activation processed:', {
+    console.log('🎯 Feature activation processed via Kiro Agent Hook CI/CD:', {
       correlationId,
       vehicleId,
       featureId,
-      timestamp
+      timestamp,
+      pipelineVersion: '1.0.5',
+      deploymentMethod: 'kiro-agent-hook'
     });
     
-    // In production, this would send messages to IoT Core
+    // In production, this would send messages to IoT Core following Qualcomm SDK patterns
     // await iotCore.publish({
     //   topic: `vehicle/${vehicleId}/feature/activate`,
-    //   payload: { featureId, timestamp, correlationId }
+    //   payload: { 
+    //     messageId: correlationId,
+    //     featureId, 
+    //     timestamp, 
+    //     messageType: 'FEATURE_ACTIVATION',
+    //     signature: 'ecdsa-sha256-signature'
+    //   }
     // });
     
     return {
