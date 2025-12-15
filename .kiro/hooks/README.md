@@ -1,234 +1,158 @@
-# Agent Hooks Guide
+# 🎣 Kiro Agent Hooks for Snapdragon FOD System
 
-This directory contains Agent Hooks that combine automation with AI intelligence using MCP servers.
+This directory contains Kiro agent hooks that automate various development and deployment workflows using Kiro's MCP (Model Context Protocol) servers.
 
-## 🎯 Understanding Hooks + MCP Servers
+## 🚀 **Activation Handler CI/CD Hooks**
 
-### Simple Hooks (Command Only)
-- **Auto Push to GitHub**: Runs `git push origin HEAD`
-- **Restart Simulator**: Runs `npm run simulator:restart`
-- **Test Lambda Functions**: Runs `npm test`
+### **Automatic Deployment Hook**
+- **File**: `activation-handler-cicd.kiro.hook`
+- **Trigger**: When files in `src/lambda/activation-handler/` are saved
+- **Purpose**: Automatically deploys activation handler using Kiro MCP servers
+- **Features**:
+  - Code quality validation (build, lint, test)
+  - Git operations (commit, push)
+  - AWS deployment via MCP
+  - Health checks and verification
+  - GitHub issue creation for documentation
+  - Snapdragon simulator testing
 
-### Smart Hooks (AI + MCP Servers)
-These hooks ask Kiro AI to perform intelligent actions using MCP server tools.
+### **Manual Deployment Hook**
+- **File**: `manual-activation-deploy.kiro.hook`
+- **Trigger**: User-triggered (manual)
+- **Purpose**: On-demand activation handler deployment
+- **Features**:
+  - Pre-deployment assessment
+  - Interactive deployment confirmation
+  - Real-time monitoring
+  - Comprehensive health reporting
+  - Post-deployment testing
 
----
+## 🔧 **How Kiro Agent Hooks Work**
 
-## 📋 Available Smart Hooks
+### **Traditional CI/CD vs Kiro Agent Hooks**
 
-### 1. **Smart Commit and Create PR** 🚀
-**Trigger**: Manual button click
-**What it does**:
-- AI reviews your changes
-- Generates a conventional commit message
-- Creates a GitHub PR with detailed description
-- Uses: GitHub MCP Server
-
-**Use case**: "I finished a feature, create a PR for me"
-
----
-
-### 2. **Create GitHub Issue from TODO** 📝
-**Trigger**: When you edit source files
-**What it does**:
-- Scans for new TODO/FIXME comments
-- Asks if you want to create an issue
-- Creates GitHub issue with context
-- Uses: GitHub MCP Server
-
-**Use case**: Automatic issue tracking from code comments
-
----
-
-### 3. **Deployment Notification** 🚀
-**Trigger**: When infrastructure code changes
-**What it does**:
-- Monitors deployment status
-- Creates deployment record in GitHub
-- Documents changes and outputs
-- Uses: AWS Operations MCP + GitHub MCP
-
-**Use case**: Maintain deployment history
-
----
-
-### 4. **Request AI Code Review** 🔍
-**Trigger**: Manual button click
-**What it does**:
-- Reviews your code changes
-- Identifies issues (security, performance, quality)
-- Creates GitHub issues for problems found
-- Uses: GitHub MCP Server
-
-**Use case**: "Review my code before I commit"
-
----
-
-### 5. **Sync Spec Tasks with GitHub** 📊
-**Trigger**: When tasks.md is updated
-**What it does**:
-- Reads new tasks from spec
-- Creates GitHub issues for each task
-- Links to requirements and milestones
-- Uses: GitHub MCP Server
-
-**Use case**: Keep GitHub issues in sync with specs
-
----
-
-### 6. **Smart Deployment Workflow** 🎯
-**Trigger**: Manual button click
-**What it does**:
-- Complete deployment orchestration
-- Tests → Deploy → Verify → Document
-- Uses: AWS Operations MCP + GitHub MCP
-
-**Use case**: "Deploy everything and document it"
-
----
-
-## 🔄 How Hooks + MCP Servers Work Together
-
+**Traditional CI/CD:**
 ```
-┌─────────────────┐
-│  You Click Hook │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Hook Triggers  │
-│  "askAgent"     │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Kiro AI       │
-│   Analyzes      │
-│   Request       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  AI Decides to  │
-│  Use MCP Tools  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────────┐
-│  MCP Servers Execute:       │
-│  - GitHub API calls         │
-│  - AWS operations           │
-│  - File operations          │
-└────────┬────────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│  AI Reports     │
-│  Results to You │
-└─────────────────┘
+Code Change → Git Push → GitHub Actions → AWS Deployment
 ```
 
----
-
-## 🎮 How to Use These Hooks
-
-### Method 1: Via Sidebar
-1. Look for "Agent Hooks" panel in IDE sidebar
-2. Find the hook you want to use
-3. Click the "Start Hook" button
-
-### Method 2: Via Command Palette
-1. Press `Ctrl+Shift+P` (or `Cmd+Shift+P`)
-2. Type "Kiro Hook"
-3. Select the hook to run
-
----
-
-## 💡 Creating Your Own Smart Hooks
-
-### Template for AI-Powered Hook:
-```json
-{
-  "enabled": true,
-  "name": "Your Hook Name",
-  "description": "What it does",
-  "version": "1",
-  "when": {
-    "type": "userTriggered"  // or "fileEdited"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Tell Kiro AI what to do. Be specific about:\n1. What to analyze\n2. Which MCP servers to use\n3. What actions to take\n4. What to report back"
-  }
-}
+**Kiro Agent Hooks:**
+```
+Code Change → Kiro Hook Trigger → Agent Execution → MCP Server Operations → AWS Deployment
 ```
 
-### Available MCP Servers to Use:
-- **GitHub MCP**: Create issues, PRs, repos, list repos
-- **AWS Operations MCP**: Check stacks, Lambda metrics, deployments
-- **Snapdragon Simulator MCP**: Test vehicle features
-- **Filesystem MCP**: Read/write files
+### **Key Advantages of Kiro Agent Hooks:**
+
+1. **🤖 AI-Powered**: Intelligent decision making during deployment
+2. **🔌 MCP Integration**: Direct access to AWS, GitHub, and Simulator services
+3. **📊 Real-time Monitoring**: Live feedback and status updates
+4. **🧪 Integrated Testing**: Automatic testing with Snapdragon simulator
+5. **📋 Auto-Documentation**: Automatic GitHub issue creation and tracking
+6. **🚨 Smart Error Handling**: Intelligent error detection and remediation
+7. **🎯 Context-Aware**: Understands your codebase and makes smart decisions
+
+## 🎯 **Using the Activation Handler CI/CD**
+
+### **Automatic Deployment (Recommended)**
+1. Edit `src/lambda/activation-handler/index.ts`
+2. Save the file
+3. Kiro hook automatically triggers
+4. Agent executes the full CI/CD pipeline
+5. Deployment completes with full documentation
+
+### **Manual Deployment**
+1. Use Kiro command palette or hook trigger
+2. Select "Manual: Deploy Activation Handler"
+3. Follow the interactive deployment process
+4. Agent guides you through each step
+
+## 🔍 **MCP Servers Used**
+
+### **AWS Operations MCP**
+- Lambda function management
+- CloudWatch monitoring
+- Stack status checking
+- Deployment verification
+
+### **GitHub MCP**
+- Issue creation and management
+- Repository operations
+- Documentation updates
+- Deployment tracking
+
+### **Snapdragon Simulator MCP**
+- Activation flow testing
+- Vehicle state verification
+- Integration testing
+- Performance validation
+
+## 📊 **Hook Status**
+
+| Hook Name | Status | Purpose | Trigger |
+|-----------|--------|---------|---------|
+| `activation-handler-cicd` | ✅ Active | Auto-deploy activation handler | File save |
+| `manual-activation-deploy` | ✅ Active | Manual deployment | User trigger |
+| `trigger-cicd-pipeline` | ❌ Disabled | Legacy CI/CD | File save |
+| `smart-deployment-workflow` | ✅ Active | General deployment | User trigger |
+| `quick-lambda-health-check` | ✅ Active | Health monitoring | User trigger |
+
+## 🎮 **How to Use**
+
+### **Enable/Disable Hooks**
+Edit the hook file and change `"enabled": true/false`
+
+### **Modify Hook Behavior**
+Edit the `"prompt"` section in the hook file to customize the workflow
+
+### **Create New Hooks**
+Copy an existing hook and modify:
+- `name`: Display name
+- `description`: What the hook does
+- `when`: Trigger conditions
+- `then.prompt`: Workflow instructions
+
+## 🚨 **Troubleshooting**
+
+### **Hook Not Triggering**
+1. Check `"enabled": true` in hook file
+2. Verify file pattern matches your changes
+3. Ensure Kiro agent is active
+
+### **MCP Server Errors**
+1. Check MCP server configuration in Kiro settings
+2. Verify AWS credentials are configured
+3. Ensure GitHub token has proper permissions
+
+### **Deployment Failures**
+1. Check code quality (build, lint, test)
+2. Verify AWS permissions
+3. Check GitHub Actions workflow status
+4. Review CloudWatch logs
+
+## 🎯 **Best Practices**
+
+1. **Always test locally** before triggering deployment hooks
+2. **Review changes** before confirming deployment
+3. **Monitor CloudWatch logs** after deployment
+4. **Keep hooks updated** with your workflow changes
+5. **Use descriptive commit messages** for better tracking
+
+## 🔮 **Future Enhancements**
+
+- **Multi-environment deployment** hooks
+- **Rollback automation** hooks
+- **Performance monitoring** hooks
+- **Security scanning** integration
+- **Automated testing** expansion
+
+## 📞 **Support**
+
+If you encounter issues with the hooks:
+1. Check the hook execution logs in Kiro
+2. Verify MCP server status
+3. Review AWS and GitHub permissions
+4. Check the troubleshooting section above
 
 ---
 
-## 🔧 Troubleshooting
-
-### Hook doesn't trigger:
-- Check if hook is enabled (`"enabled": true`)
-- Verify file patterns match your files
-- Check Kiro output panel for errors
-
-### AI doesn't use MCP server:
-- Ensure MCP server is configured in `.kiro/settings/mcp.json`
-- Check if MCP server is running (not disabled)
-- Verify authentication (tokens, credentials)
-
-### Hook runs but nothing happens:
-- Check terminal output for command execution
-- Look for AI response in chat
-- Verify MCP server tools are auto-approved
-
----
-
-## 📚 Examples
-
-### Example 1: Quick PR Creation
-1. Make code changes
-2. Click "Smart Commit and Create PR" hook
-3. AI reviews changes and suggests commit message
-4. Confirm, and AI creates PR with description
-
-### Example 2: Deployment with Documentation
-1. Update infrastructure code
-2. Click "Smart Deployment Workflow" hook
-3. AI tests, deploys, verifies, and documents
-4. GitHub issue created with deployment details
-
-### Example 3: Automatic Issue Tracking
-1. Add `// TODO: Fix this bug` in code
-2. Save file (hook triggers automatically)
-3. AI finds TODO and asks if you want an issue
-4. Confirm, and GitHub issue is created
-
----
-
-## 🎯 Best Practices
-
-1. **Be Specific in Prompts**: Tell AI exactly what you want
-2. **Use Auto-Approve**: Add frequently used tools to autoApprove list
-3. **Test Hooks**: Try hooks on small changes first
-4. **Review AI Actions**: Always review what AI plans to do
-5. **Combine Hooks**: Use multiple hooks for complex workflows
-
----
-
-## 🚀 Next Steps
-
-1. Try the "Smart Commit and Create PR" hook
-2. Customize prompts to match your workflow
-3. Create your own hooks for repetitive tasks
-4. Share useful hooks with your team
-
----
-
-**Remember**: Hooks are automation, MCP Servers are AI superpowers. Together, they make you incredibly productive!
+**🎉 Your activation handler now has intelligent, AI-powered CI/CD through Kiro agent hooks!**

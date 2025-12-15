@@ -253,7 +253,7 @@ export async function handler(event: SQSEvent): Promise<void> {
   // eslint-disable-next-line no-console
   console.log('Activation handler triggered:', JSON.stringify(event));
   // eslint-disable-next-line no-console
-  console.log('Activation Handler v1.0.2 - Pipeline Fixed:', new Date().toISOString());
+  console.log('Activation Handler v1.0.3 - Kiro Agent Hook Powered:', new Date().toISOString());
 
   const results = await Promise.allSettled(
     event.Records.map(async (record: SQSRecord) => {
