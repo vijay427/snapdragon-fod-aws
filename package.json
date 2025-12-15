@@ -20,7 +20,15 @@
     "hooks:setup": "node scripts/setup-git-hooks.js",
     "hooks:remove": "node scripts/setup-git-hooks.js --remove",
     "hooks:list": "node scripts/setup-git-hooks.js --list",
-    "cicd:trigger": "node scripts/trigger-cicd.js"
+    "cicd:trigger": "node scripts/trigger-cicd.js",
+    "lambda:list": "node scripts/check-lambda-status.js list",
+    "lambda:health": "node scripts/check-lambda-status.js health",
+    "lambda:details": "node scripts/check-lambda-status.js details",
+    "lambda:test": "node scripts/check-lambda-status.js test",
+    "lambda:logs": "node scripts/check-lambda-status.js logs",
+    "lambda:api": "node scripts/check-lambda-status.js api",
+    "lambda:urls": "node scripts/check-lambda-status.js urls",
+    "lambda:all": "node scripts/check-lambda-status.js all"
   },
   "keywords": [
     "snapdragon",

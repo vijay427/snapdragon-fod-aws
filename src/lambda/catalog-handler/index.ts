@@ -89,6 +89,8 @@ export function handler(_event: APIGatewayProxyEvent): APIGatewayProxyResult {
           features: mockFeatures,
           count: mockFeatures.length,
         },
+        version: '1.0.1',
+        deployedAt: new Date().toISOString(),
         timestamp: new Date().toISOString(),
       }),
     };
