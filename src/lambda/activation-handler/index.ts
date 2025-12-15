@@ -253,7 +253,12 @@ export async function handler(event: SQSEvent): Promise<void> {
   // eslint-disable-next-line no-console
   console.log('Activation handler triggered:', JSON.stringify(event));
   // eslint-disable-next-line no-console
-  console.log('Activation Handler v1.0.3 - Kiro Agent Hook Powered:', new Date().toISOString());
+  console.log(
+    'Activation Handler v1.0.4 - Testing Kiro Agent Hook CI/CD:',
+    new Date().toISOString()
+  );
+  // eslint-disable-next-line no-console
+  console.log('🚀 Deployed via AI-powered Kiro Agent Hook at:', new Date().toISOString());
 
   const results = await Promise.allSettled(
     event.Records.map(async (record: SQSRecord) => {
